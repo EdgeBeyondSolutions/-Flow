@@ -7,11 +7,11 @@ import {
   createTask, updateTask, deleteTask, createProject, updateProject, createContext,
 } from './store.js';
 import { state, notify, onStateChange } from './state.js';
-import { renderInbox, renderNextList, renderNextBoard, renderWaiting, renderSomeday, renderDone } from './views/lists.js';
+import { renderInbox, renderToday, renderScheduled, renderNextList, renderNextBoard, renderWaiting, renderSomeday, renderDone } from './views/lists.js';
 import { renderProjectsGrid, renderProjectDetail } from './views/projects.js';
 import { renderCalendar } from './views/calendar.js';
 import { renderReview } from './views/review.js';
-import { escapeHtml, autoResize } from './util.js';
+import { escapeHtml, autoResize, todayISO } from './util.js';
 
 // ───────────────────────── Theme ─────────────────────────
 const THEME_KEY = 'flow-theme';
@@ -113,7 +113,7 @@ function boot() {
 
 // ───────────────────────── Navigation ─────────────────────────
 const viewTitles = {
-  inbox: 'Inbox', next: 'Next actions', projects: 'Projects', waiting: 'Waiting for',
+  inbox: 'Inbox', today: 'Today', scheduled: 'Scheduled', next: 'Next actions', projects: 'Projects', waiting: 'Waiting for',
   calendar: 'Calendar', someday: 'Someday / Maybe', review: 'Weekly review', done: 'Done',
 };
 
@@ -153,7 +153,10 @@ function render() {
   document.getElementById('view-title').textContent = state.view === 'projects' && state.selectedProjectId
     ? '' : viewTitles[state.view];
 
+  const today = todayISO();
   document.getElementById('count-inbox').textContent = state.tasks.filter((t) => t.status === 'inbox').length;
+  document.getElementById('count-today').textContent = state.tasks.filter((t) => t.due === today && t.status !== 'done').length;
+  document.getElementById('count-scheduled').textContent = state.tasks.filter((t) => !!t.due && t.status !== 'done').length;
   document.getElementById('count-next').textContent = state.tasks.filter((t) => t.status === 'next').length;
   document.getElementById('count-waiting').textContent = state.tasks.filter((t) => t.status === 'waiting').length;
   document.getElementById('count-someday').textContent = state.tasks.filter((t) => t.status === 'someday').length;

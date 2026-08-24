@@ -1,5 +1,24 @@
 import { state, filteredTasks } from '../state.js';
 import { taskCardHTML, emptyStateHTML } from './taskCard.js';
+import { todayISO } from '../util.js';
+
+export function renderToday() {
+  const today = todayISO();
+  const tasks = filteredTasks((t) => t.due === today && t.status !== 'done');
+  if (!tasks.length) {
+    return emptyStateHTML('☀️', 'Nothing due today', 'Tasks with a due date of today will show up here.');
+  }
+  return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
+}
+
+export function renderScheduled() {
+  const tasks = filteredTasks((t) => !!t.due && t.status !== 'done')
+    .sort((a, b) => a.due.localeCompare(b.due));
+  if (!tasks.length) {
+    return emptyStateHTML('🗓', 'Nothing scheduled', 'Any task with a due date will show up here, soonest first.');
+  }
+  return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
+}
 
 export function renderInbox() {
   const tasks = filteredTasks((t) => t.status === 'inbox');
