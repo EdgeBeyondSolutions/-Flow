@@ -1,0 +1,95 @@
+/* ---------- List view ---------- */
+.task-list { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
+
+/* ---------- Board / Kanban ---------- */
+.board {
+  display: flex; gap: 16px; overflow-x: auto; padding-bottom: 20px; height: 100%;
+}
+.board-column {
+  flex: 0 0 280px; display: flex; flex-direction: column; gap: 10px;
+  background: var(--surface-2); border-radius: var(--radius-lg); padding: 14px;
+  max-height: 100%;
+}
+.board-column-header { display: flex; align-items: center; gap: 8px; padding: 0 4px 4px; }
+.board-column-title { font-weight: 700; font-size: 13px; }
+.board-column-count { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+.board-column-body { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding: 2px; }
+.board-column-body.drag-over { outline: 2px dashed var(--accent); outline-offset: -4px; border-radius: var(--radius-md); }
+.task-card.dragging { opacity: .4; }
+
+/* ---------- Projects ---------- */
+.project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.project-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 18px; cursor: pointer; transition: all .15s var(--ease);
+}
+.project-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.project-card-name { font-family: var(--font-display); font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+.project-card-outcome { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px; min-height: 36px; }
+.project-progress-bar { height: 6px; background: var(--surface-2); border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+.project-progress-fill { height: 100%; background: var(--next); border-radius: 6px; transition: width .3s var(--ease); }
+.project-progress-label { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); }
+.new-project-card {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1.5px dashed var(--border); border-radius: var(--radius-lg); min-height: 140px;
+  color: var(--text-tertiary); font-weight: 600; font-size: 13px;
+}
+.new-project-card:hover { border-color: var(--accent); color: var(--accent); }
+
+.project-detail-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 12px; }
+.project-detail-outcome { color: var(--text-secondary); font-size: 13.5px; margin-top: 4px; max-width: 560px; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 13px; margin-bottom: 14px; font-weight: 600; }
+.back-link:hover { color: var(--accent); }
+
+/* ---------- Calendar ---------- */
+.calendar-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.calendar-nav-btn { width: 30px; height: 30px; border-radius: 50%; background: var(--surface-2); }
+.calendar-nav-btn:hover { background: var(--accent-soft); color: var(--accent); }
+.calendar-month-label { font-family: var(--font-display); font-weight: 700; font-size: 16px; min-width: 160px; text-align: center; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.calendar-dow { text-align: center; font-size: 11px; color: var(--text-tertiary); font-weight: 700; padding-bottom: 6px; text-transform: uppercase; }
+.calendar-cell {
+  min-height: 90px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 6px; background: var(--surface); display: flex; flex-direction: column; gap: 4px;
+}
+.calendar-cell.other-month { opacity: .35; }
+.calendar-cell.today { border-color: var(--accent); background: var(--accent-soft); }
+.calendar-date { font-size: 11px; font-weight: 700; color: var(--text-secondary); font-family: var(--font-mono); }
+.calendar-task {
+  font-size: 10.5px; padding: 3px 6px; border-radius: 5px; background: var(--surface-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;
+}
+.calendar-task:hover { background: var(--accent-soft); color: var(--accent); }
+.calendar-task.overdue { background: var(--danger-soft); color: var(--danger); }
+
+/* ---------- Weekly review ---------- */
+.review-wrap { max-width: 640px; }
+.review-intro { color: var(--text-secondary); font-size: 13.5px; margin-bottom: 24px; line-height: 1.6; }
+.review-step {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px; margin-bottom: 14px;
+}
+.review-step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.review-step-num {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent);
+  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;
+}
+.review-step-title { font-weight: 700; font-size: 14.5px; }
+.review-step-desc { font-size: 12.5px; color: var(--text-secondary); margin: 6px 0 12px 38px; line-height: 1.5; }
+.review-step-content { margin-left: 38px; }
+.review-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+.review-step.complete { border-color: var(--next); }
+.review-step.complete .review-step-num { background: var(--next); color: var(--accent-contrast); }
+
+/* ---------- Section headers within views ---------- */
+.section-heading {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--text-tertiary); margin: 22px 0 10px; padding-top: 4px;
+}
+.section-heading:first-child { margin-top: 0; }
+
+@media (max-width: 640px) {
+  .calendar-cell { min-height: 60px; }
+  .calendar-task { display: none; }
+  .calendar-cell.has-tasks::after { content: '•'; color: var(--accent); font-size: 18px; }
+}

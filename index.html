@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Flow — GTD</title>
+<meta name="description" content="A personal task manager built around Getting Things Done." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌊</text></svg>" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/tokens.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/layout.css" />
+<link rel="stylesheet" href="css/components.css" />
+<link rel="stylesheet" href="css/views.css" />
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="auth-logo-word">Flow</span>
+    </div>
+    <p class="auth-tag">Your mind, clear. Getting&nbsp;Things&nbsp;Done, without the friction.</p>
+    <div id="auth-error" class="auth-error" hidden></div>
+    <form id="auth-form" class="auth-form">
+      <input id="auth-email" type="email" placeholder="you@email.com" autocomplete="email" required />
+      <input id="auth-password" type="password" placeholder="Password" autocomplete="current-password" required minlength="6" />
+      <button type="submit" id="auth-submit" class="btn btn-primary btn-block">Sign in</button>
+    </form>
+    <button id="auth-toggle-mode" class="auth-link">First time here? Create an account</button>
+    <div id="auth-loading" class="auth-loading" hidden>Connecting…</div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app" class="app" hidden>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="brand">
+        <span class="brand-word">Flow</span>
+      </div>
+      <button id="capture-btn" class="capture-btn" title="Quick capture (C)">
+        <span class="plus">+</span> Capture
+      </button>
+    </div>
+
+    <nav class="nav" id="main-nav">
+      <button class="nav-item" data-view="inbox">
+        <span class="nav-icon">📥</span><span>Inbox</span><span class="nav-count" id="count-inbox">0</span>
+      </button>
+      <button class="nav-item" data-view="next">
+        <span class="nav-icon">⚡</span><span>Next actions</span><span class="nav-count" id="count-next">0</span>
+      </button>
+      <button class="nav-item" data-view="projects">
+        <span class="nav-icon">🗂</span><span>Projects</span><span class="nav-count" id="count-projects">0</span>
+      </button>
+      <button class="nav-item" data-view="waiting">
+        <span class="nav-icon">⏳</span><span>Waiting for</span><span class="nav-count" id="count-waiting">0</span>
+      </button>
+      <button class="nav-item" data-view="calendar">
+        <span class="nav-icon">📆</span><span>Calendar</span>
+      </button>
+      <button class="nav-item" data-view="someday">
+        <span class="nav-icon">💭</span><span>Someday / Maybe</span><span class="nav-count" id="count-someday">0</span>
+      </button>
+      <button class="nav-item" data-view="review">
+        <span class="nav-icon">🔄</span><span>Weekly review</span>
+      </button>
+      <button class="nav-item" data-view="done">
+        <span class="nav-icon">✅</span><span>Done</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Contexts</div>
+      <div id="context-list" class="context-list"></div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button id="theme-toggle" class="icon-btn" title="Toggle theme">🌙</button>
+      <button id="logout-btn" class="icon-btn" title="Sign out">⏻</button>
+    </div>
+  </aside>
+
+  <main class="main" id="main-content">
+    <header class="topbar">
+      <button id="mobile-nav-toggle" class="mobile-nav-toggle">☰</button>
+      <h1 id="view-title" class="view-title">Inbox</h1>
+      <div class="view-switch" id="view-switch" hidden>
+        <button class="switch-btn active" data-mode="list">List</button>
+        <button class="switch-btn" data-mode="board">Board</button>
+      </div>
+      <div class="topbar-search">
+        <input id="search-input" type="text" placeholder="Search… (/)" />
+      </div>
+    </header>
+
+    <div class="view-body" id="view-body">
+      <!-- rendered by JS -->
+    </div>
+  </main>
+
+  <div id="mobile-nav-overlay" class="mobile-nav-overlay" hidden></div>
+</div>
+
+<!-- TASK DETAIL / EDIT DRAWER -->
+<div id="task-drawer" class="drawer" hidden>
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <div class="drawer-panel">
+    <form id="task-form" class="task-form">
+      <input type="hidden" id="task-id" />
+      <textarea id="task-title" class="task-title-input" placeholder="What needs to happen?" rows="1" required></textarea>
+
+      <div class="field-row">
+        <label>Status</label>
+        <select id="task-status">
+          <option value="inbox">Inbox</option>
+          <option value="next">Next action</option>
+          <option value="waiting">Waiting for</option>
+          <option value="someday">Someday / Maybe</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <label>Context</label>
+        <select id="task-context"></select>
+      </div>
+
+      <div class="field-row" id="project-field-row">
+        <label>Project</label>
+        <select id="task-project"><option value="">— None —</option></select>
+      </div>
+
+      <div class="field-row">
+        <label>Priority</label>
+        <select id="task-priority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <label>Due date</label>
+        <input type="date" id="task-due" />
+      </div>
+
+      <div class="field-row" id="waiting-field-row">
+        <label>Waiting on</label>
+        <input type="text" id="task-waiting-on" placeholder="Who / what?" />
+      </div>
+
+      <div class="field-row full">
+        <label>Notes</label>
+        <textarea id="task-notes" rows="4" placeholder="Details, links, extra context…"></textarea>
+      </div>
+
+      <div class="drawer-actions">
+        <button type="button" id="task-delete" class="btn btn-ghost btn-danger">Delete</button>
+        <div class="drawer-actions-right">
+          <button type="button" id="task-cancel" class="btn btn-ghost">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- PROJECT CREATE/EDIT MODAL -->
+<div id="project-modal" class="modal" hidden>
+  <div class="modal-backdrop" id="project-modal-backdrop"></div>
+  <div class="modal-panel">
+    <h2>New project</h2>
+    <form id="project-form">
+      <input type="hidden" id="project-id" />
+      <input id="project-name" type="text" placeholder="Project name" required />
+      <textarea id="project-outcome" placeholder="What does done look like? (desired outcome)" rows="2"></textarea>
+      <div class="modal-actions">
+        <button type="button" id="project-cancel" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save project</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- CONTEXT MANAGE MODAL -->
+<div id="context-modal" class="modal" hidden>
+  <div class="modal-backdrop" id="context-modal-backdrop"></div>
+  <div class="modal-panel">
+    <h2>New context</h2>
+    <form id="context-form">
+      <input id="context-name" type="text" placeholder="e.g. @Computer, @Calls, @Home" required />
+      <div class="color-swatches" id="color-swatches"></div>
+      <div class="modal-actions">
+        <button type="button" id="context-cancel" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create context</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- QUICK CAPTURE MODAL -->
+<div id="capture-modal" class="modal capture-modal" hidden>
+  <div class="modal-backdrop" id="capture-modal-backdrop"></div>
+  <div class="modal-panel capture-panel">
+    <form id="capture-form">
+      <input id="capture-input" type="text" placeholder="Capture whatever's on your mind…" autocomplete="off" />
+      <div class="capture-hint">Enter to save to Inbox · Esc to close</div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="js/firebase-config.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

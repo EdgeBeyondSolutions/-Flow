@@ -1,0 +1,99 @@
+:root {
+  --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --bg: #F6F5F2;
+  --bg-elevated: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-2: #EFEDE8;
+  --border: #E2DFD8;
+  --text: #171712;
+  --text-secondary: #6B6A62;
+  --text-tertiary: #9C9A90;
+
+  --accent: #5B3FE0;
+  --accent-soft: #EDE9FE;
+  --accent-contrast: #FFFFFF;
+
+  --next: #0E8A6D;
+  --next-soft: #DAF5EC;
+  --waiting: #C77D14;
+  --waiting-soft: #FBEBD3;
+  --danger: #C6402C;
+  --danger-soft: #FBE1DC;
+  --someday: #6B6FA8;
+  --someday-soft: #E7E7F6;
+  --done: #8C8A80;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+
+  --shadow-sm: 0 1px 2px rgba(23, 23, 18, 0.06);
+  --shadow-md: 0 4px 16px rgba(23, 23, 18, 0.08);
+  --shadow-lg: 0 12px 40px rgba(23, 23, 18, 0.14);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root[data-theme="dark"] {
+  --bg: #0C0D10;
+  --bg-elevated: #16171C;
+  --surface: #16171C;
+  --surface-2: #1E2027;
+  --border: #2A2C34;
+  --text: #F2F1ED;
+  --text-secondary: #A5A4A0;
+  --text-tertiary: #6E6E6C;
+
+  --accent: #8B7BF0;
+  --accent-soft: #2A2350;
+  --accent-contrast: #0C0D10;
+
+  --next: #35D6A8;
+  --next-soft: #123B31;
+  --waiting: #F0AA4E;
+  --waiting-soft: #3D2C10;
+  --danger: #F0796A;
+  --danger-soft: #3D1F19;
+  --someday: #9FA3E8;
+  --someday-soft: #23264A;
+  --done: #6E6E6C;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C0D10;
+    --bg-elevated: #16171C;
+    --surface: #16171C;
+    --surface-2: #1E2027;
+    --border: #2A2C34;
+    --text: #F2F1ED;
+    --text-secondary: #A5A4A0;
+    --text-tertiary: #6E6E6C;
+
+    --accent: #8B7BF0;
+    --accent-soft: #2A2350;
+    --accent-contrast: #0C0D10;
+
+    --next: #35D6A8;
+    --next-soft: #123B31;
+    --waiting: #F0AA4E;
+    --waiting-soft: #3D2C10;
+    --danger: #F0796A;
+    --danger-soft: #3D1F19;
+    --someday: #9FA3E8;
+    --someday-soft: #23264A;
+    --done: #6E6E6C;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+  }
+}
