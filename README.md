@@ -1,4 +1,4 @@
-# Flow — personal GTD manager
+# -Flow — personal GTD manager
 
 A productivity app built around *Getting Things Done* (David Allen): Inbox, Next
 actions (list + board by context), Projects, Waiting for, Someday/Maybe, Calendar,
