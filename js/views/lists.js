@@ -1,5 +1,5 @@
 import { state, filteredTasks } from '../state.js';
-import { taskCardHTML, emptyStateHTML } from './taskCard.js';
+import { taskCardHTML, taskTableHTML, emptyStateHTML } from './taskCard.js';
 import { todayISO } from '../util.js';
 
 export function renderToday() {
@@ -8,7 +8,7 @@ export function renderToday() {
   if (!tasks.length) {
     return emptyStateHTML('☀️', 'Nothing due today', 'Scheduled tasks with a due date of today will show up here.');
   }
-  return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
+  return taskTableHTML(tasks, 'TODAY');
 }
 
 export function renderScheduled() {
@@ -17,7 +17,7 @@ export function renderScheduled() {
   if (!tasks.length) {
     return emptyStateHTML('🗓', 'Nothing scheduled', 'Tasks tied to a specific date go here, soonest first.');
   }
-  return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
+  return taskTableHTML(tasks, 'SCHEDULED');
 }
 
 export function renderInbox() {
@@ -25,7 +25,7 @@ export function renderInbox() {
   if (!tasks.length) {
     return emptyStateHTML('📥', 'Your inbox is empty', 'Capture whatever is on your mind with the "Capture" button (or the C key). Then clarify it: turn it into a next action, a project, or a someday item.');
   }
-  return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
+  return taskTableHTML(tasks, 'INBOX');
 }
 
 export function renderNextList() {
@@ -33,7 +33,7 @@ export function renderNextList() {
   if (!tasks.length) {
     return emptyStateHTML('⚡', 'No next actions yet', 'Clarify tasks from your Inbox so they show up here, ready to execute. Tasks tied to a date live in Scheduled instead.');
   }
-  return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
+  return taskTableHTML(tasks, 'NEXT ACTIONS');
 }
 
 export function renderNextBoard() {
@@ -68,7 +68,7 @@ export function renderWaiting() {
   if (!tasks.length) {
     return emptyStateHTML('⏳', 'Nothing waiting on others', 'Tasks you delegated or that depend on someone else go here.');
   }
-  return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
+  return taskTableHTML(tasks, 'WAITING FOR');
 }
 
 export function renderSomeday() {
@@ -76,7 +76,7 @@ export function renderSomeday() {
   if (!tasks.length) {
     return emptyStateHTML('💭', 'No ideas saved yet', 'Anything that is not urgent but worth remembering someday goes here, off your daily radar.');
   }
-  return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
+  return taskTableHTML(tasks, 'SOMEDAY / MAYBE');
 }
 
 export function renderDone() {
@@ -86,5 +86,5 @@ export function renderDone() {
   if (!tasks.length) {
     return emptyStateHTML('✅', 'Nothing completed yet', 'Tasks you mark as done will show up here.');
   }
-  return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
+  return taskTableHTML(tasks, 'DONE');
 }

@@ -30,7 +30,14 @@ export function formatDue(dueISO) {
 }
 
 export function priorityLabel(p) {
-  return { high: 'High', medium: 'Medium', low: 'Low' }[p] || 'Medium';
+  return { critical: 'Critical', high: 'High', medium: 'Medium', low: 'Low' }[p] || 'Medium';
+}
+
+export function formatDueShort(dueISO) {
+  if (!dueISO) return '';
+  const [y, m, d] = dueISO.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
 }
 
 export function debounce(fn, ms) {

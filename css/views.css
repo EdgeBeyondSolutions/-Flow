@@ -1,4 +1,79 @@
-/* ---------- List view ---------- */
+/* ---------- Task table (ClickUp-style list) ---------- */
+.task-table { margin-bottom: 24px; }
+.task-table-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 4px; cursor: pointer; user-select: none;
+}
+.table-toggle-chevron { font-size: 10px; color: var(--text-tertiary); transition: transform .15s var(--ease); width: 12px; }
+.task-table.collapsed .table-toggle-chevron { transform: rotate(-90deg); }
+.task-table.collapsed .task-table-body { display: none; }
+.table-group-label {
+  font-size: 12px; font-weight: 700; letter-spacing: .05em; color: var(--text-secondary);
+}
+.table-group-count {
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary);
+  background: var(--surface-2); border-radius: 20px; padding: 1px 8px;
+}
+.task-table-body {
+  border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden;
+  background: var(--surface);
+}
+.task-table-columns {
+  display: flex; align-items: center; gap: 12px; padding: 8px 14px;
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--text-tertiary);
+}
+.col-name { flex: 1; min-width: 0; }
+.col-context { width: 220px; flex-shrink: 0; }
+.col-due { width: 90px; flex-shrink: 0; }
+.col-priority { width: 110px; flex-shrink: 0; }
+
+.task-row {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  border-bottom: 1px solid var(--border); transition: background .12s var(--ease);
+}
+.task-row:last-child { border-bottom: none; }
+.task-row:hover { background: var(--surface-2); }
+.task-row.done { opacity: .5; }
+.task-row.done .task-row-title { text-decoration: line-through; }
+
+.task-row-checkbox {
+  width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--border);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; cursor: pointer; transition: all .15s var(--ease);
+}
+.task-row-checkbox:hover { border-color: var(--next); }
+.task-row-checkbox.checked { background: var(--next); border-color: var(--next); color: var(--accent-contrast); }
+
+.task-row-main { flex: 1; min-width: 0; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+.task-row-title {
+  font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.task-row-tags-mobile { display: none; flex-wrap: wrap; gap: 6px; }
+
+.task-row-col { flex-shrink: 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.task-row-col-context { width: 220px; }
+.task-row-col-due { width: 90px; }
+.task-row-col-priority { width: 110px; }
+
+.row-due { font-size: 12px; font-family: var(--font-mono); color: var(--text-secondary); }
+.row-due.overdue { color: var(--danger); font-weight: 700; }
+
+.row-priority { font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.row-priority-critical { color: var(--danger); }
+.row-priority-high { color: var(--waiting); }
+.row-priority-medium { color: var(--text-secondary); }
+.row-priority-low { color: var(--text-tertiary); }
+
+@media (max-width: 860px) {
+  .task-table-columns { display: none; }
+  .task-row { flex-wrap: wrap; }
+  .task-row-col { display: none; }
+  .task-row-tags-mobile { display: flex; margin-top: 2px; }
+}
+
+/* ---------- List view (legacy card cards, still used by board columns) ---------- */
 .task-list { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
 
 /* ---------- Board / Kanban ---------- */

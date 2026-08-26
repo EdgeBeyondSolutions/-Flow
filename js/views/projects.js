@@ -1,6 +1,6 @@
 import { state } from '../state.js';
 import { escapeHtml } from '../util.js';
-import { taskCardHTML, emptyStateHTML } from './taskCard.js';
+import { taskTableHTML, emptyStateHTML } from './taskCard.js';
 
 export function renderProjectsGrid() {
   const term = state.search.trim().toLowerCase();
@@ -51,11 +51,7 @@ export function renderProjectDetail(projectId) {
         <button class="btn btn-primary" data-action="add-task-to-project" data-id="${project.id}">+ Action</button>
       </div>
     </div>
-    <div class="section-heading">Active actions (${active.length})</div>
-    <div class="task-list">${active.map(taskCardHTML).join('') || emptyStateHTML('⚡', 'No active actions', 'Add the concrete next action to move this project forward.')}</div>
-    ${done.length ? `
-      <div class="section-heading">Completed (${done.length})</div>
-      <div class="task-list">${done.map(taskCardHTML).join('')}</div>
-    ` : ''}
+    ${active.length ? taskTableHTML(active, 'ACTIVE ACTIONS') : emptyStateHTML('⚡', 'No active actions', 'Add the concrete next action to move this project forward.')}
+    ${done.length ? taskTableHTML(done, 'COMPLETED') : ''}
   `;
 }

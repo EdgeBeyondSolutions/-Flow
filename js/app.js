@@ -214,6 +214,9 @@ function renderTaskFormOptions() {
 
 // ───────────────────────── Body click delegation ─────────────────────────
 document.getElementById('view-body').addEventListener('click', (e) => {
+  const toggleGroup = e.target.closest('[data-action="toggle-group"]');
+  if (toggleGroup) { toggleGroup.closest('.task-table').classList.toggle('collapsed'); return; }
+
   const toggle = e.target.closest('[data-action="toggle-done"]');
   if (toggle) {
     const task = state.tasks.find((t) => t.id === toggle.dataset.id);
