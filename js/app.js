@@ -172,6 +172,8 @@ function render() {
   const body = document.getElementById('view-body');
   switch (state.view) {
     case 'inbox': body.innerHTML = renderInbox(); break;
+    case 'today': body.innerHTML = renderToday(); break;
+    case 'scheduled': body.innerHTML = renderScheduled(); break;
     case 'next': body.innerHTML = state.boardMode ? renderNextBoard() : renderNextList(); break;
     case 'projects':
       body.innerHTML = state.selectedProjectId ? renderProjectDetail(state.selectedProjectId) : renderProjectsGrid();
