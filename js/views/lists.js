@@ -29,15 +29,15 @@ export function renderInbox() {
 }
 
 export function renderNextList() {
-  const tasks = filteredTasks((t) => t.status === 'next');
+  const tasks = filteredTasks((t) => t.status === 'next' && !t.due);
   if (!tasks.length) {
-    return emptyStateHTML('⚡', 'No next actions yet', 'Clarify tasks from your Inbox so they show up here, ready to execute.');
+    return emptyStateHTML('⚡', 'No next actions yet', 'Clarify tasks from your Inbox so they show up here, ready to execute. Tasks with a due date live in Scheduled instead.');
   }
   return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
 }
 
 export function renderNextBoard() {
-  const tasks = filteredTasks((t) => t.status === 'next');
+  const tasks = filteredTasks((t) => t.status === 'next' && !t.due);
   const noContext = tasks.filter((t) => !t.context);
   const columns = state.contexts.map((ctx) => ({
     id: ctx.id, name: ctx.name, color: ctx.color,

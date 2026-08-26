@@ -157,7 +157,7 @@ function render() {
   document.getElementById('count-inbox').textContent = state.tasks.filter((t) => t.status === 'inbox').length;
   document.getElementById('count-today').textContent = state.tasks.filter((t) => t.due === today && t.status !== 'done').length;
   document.getElementById('count-scheduled').textContent = state.tasks.filter((t) => !!t.due && t.status !== 'done').length;
-  document.getElementById('count-next').textContent = state.tasks.filter((t) => t.status === 'next').length;
+  document.getElementById('count-next').textContent = state.tasks.filter((t) => t.status === 'next' && !t.due).length;
   document.getElementById('count-waiting').textContent = state.tasks.filter((t) => t.status === 'waiting').length;
   document.getElementById('count-someday').textContent = state.tasks.filter((t) => t.status === 'someday').length;
   document.getElementById('count-projects').textContent = state.projects.length;
