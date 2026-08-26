@@ -128,6 +128,7 @@
         <select id="task-status">
           <option value="inbox">Inbox</option>
           <option value="next">Next action</option>
+          <option value="scheduled">Scheduled</option>
           <option value="waiting">Waiting for</option>
           <option value="someday">Someday / Maybe</option>
           <option value="done">Done</option>
@@ -150,10 +151,11 @@
           <option value="low">Low</option>
           <option value="medium" selected>Medium</option>
           <option value="high">High</option>
+          <option value="critical">Critical</option>
         </select>
       </div>
 
-      <div class="field-row">
+      <div class="field-row" id="due-field-row">
         <label>Due date</label>
         <input type="date" id="task-due" />
       </div>
@@ -164,8 +166,21 @@
       </div>
 
       <div class="field-row full">
+        <label>URL</label>
+        <input type="url" id="task-url" placeholder="https://…" />
+      </div>
+
+      <div class="field-row full">
         <label>Notes</label>
         <textarea id="task-notes" rows="4" placeholder="Details, links, extra context…"></textarea>
+      </div>
+
+      <div class="field-row full">
+        <label>Attachments</label>
+        <div id="attachment-list" class="attachment-list"></div>
+        <input type="file" id="task-file-input" multiple hidden />
+        <button type="button" id="attach-file-btn" class="btn btn-ghost btn-block">+ Add file</button>
+        <div id="attachment-upload-status" class="attachment-upload-status" hidden></div>
       </div>
 
       <div class="drawer-actions">

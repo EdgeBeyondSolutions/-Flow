@@ -74,9 +74,11 @@ Then in GitHub: **Settings → Pages → Source → Deploy from a branch → mai
 - **Capture** ("Capture" button or the `C` key) — get anything on your mind into
   the Inbox without overthinking it.
 - **Clarify** — open each Inbox item and decide: is it actionable? Turn it into a
-  Next action, a Project, Waiting for, or Someday/Maybe.
-- **Organize** — assign a context (@Home, @Computer, etc.), a project, and a due
-  date if it applies.
+  Next action (no date, just context + priority), Scheduled (tied to a specific
+  date), a Project, Waiting for, or Someday/Maybe.
+- **Organize** — assign a context (@Calls, @Computer, @Errands, @Home, @Office,
+  @Agenda, @Read/Review, @Anywhere), a project, priority (Low/Medium/High/
+  Critical), a URL, and small file attachments (~700KB each) if it applies.
 - **Reflect** — use the Weekly review every week to keep the system trustworthy.
 - **Engage** — the board view in Next actions, grouped by context.
 

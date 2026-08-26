@@ -4,18 +4,18 @@ import { todayISO } from '../util.js';
 
 export function renderToday() {
   const today = todayISO();
-  const tasks = filteredTasks((t) => t.due === today && t.status !== 'done');
+  const tasks = filteredTasks((t) => t.status === 'scheduled' && t.due === today);
   if (!tasks.length) {
-    return emptyStateHTML('☀️', 'Nothing due today', 'Tasks with a due date of today will show up here.');
+    return emptyStateHTML('☀️', 'Nothing due today', 'Scheduled tasks with a due date of today will show up here.');
   }
   return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
 }
 
 export function renderScheduled() {
-  const tasks = filteredTasks((t) => !!t.due && t.status !== 'done')
-    .sort((a, b) => a.due.localeCompare(b.due));
+  const tasks = filteredTasks((t) => t.status === 'scheduled')
+    .sort((a, b) => (a.due || '').localeCompare(b.due || ''));
   if (!tasks.length) {
-    return emptyStateHTML('🗓', 'Nothing scheduled', 'Any task with a due date will show up here, soonest first.');
+    return emptyStateHTML('🗓', 'Nothing scheduled', 'Tasks tied to a specific date go here, soonest first.');
   }
   return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
 }
@@ -29,15 +29,15 @@ export function renderInbox() {
 }
 
 export function renderNextList() {
-  const tasks = filteredTasks((t) => t.status === 'next' && !t.due);
+  const tasks = filteredTasks((t) => t.status === 'next');
   if (!tasks.length) {
-    return emptyStateHTML('⚡', 'No next actions yet', 'Clarify tasks from your Inbox so they show up here, ready to execute. Tasks with a due date live in Scheduled instead.');
+    return emptyStateHTML('⚡', 'No next actions yet', 'Clarify tasks from your Inbox so they show up here, ready to execute. Tasks tied to a date live in Scheduled instead.');
   }
   return `<div class="task-list">${tasks.map(taskCardHTML).join('')}</div>`;
 }
 
 export function renderNextBoard() {
-  const tasks = filteredTasks((t) => t.status === 'next' && !t.due);
+  const tasks = filteredTasks((t) => t.status === 'next');
   const noContext = tasks.filter((t) => !t.context);
   const columns = state.contexts.map((ctx) => ({
     id: ctx.id, name: ctx.name, color: ctx.color,

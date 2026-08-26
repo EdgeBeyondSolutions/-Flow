@@ -4,11 +4,14 @@ import {
 } from './firebase.js';
 
 const DEFAULT_CONTEXTS = [
-  { name: '@Home', color: '#0E8A6D' },
-  { name: '@Computer', color: '#5B3FE0' },
   { name: '@Calls', color: '#C77D14' },
+  { name: '@Computer', color: '#5B3FE0' },
   { name: '@Errands', color: '#C6402C' },
+  { name: '@Home', color: '#0E8A6D' },
+  { name: '@Office', color: '#0E7490' },
   { name: '@Agenda', color: '#6B6FA8' },
+  { name: '@Read/Review', color: '#BE185D' },
+  { name: '@Anywhere', color: '#4D7C0F' },
 ];
 
 let uid = null;
@@ -52,7 +55,7 @@ export function subscribeContexts(cb) {
 export function createTask(data) {
   return addDoc(col('tasks'), {
     title: '', notes: '', status: 'inbox', context: '', projectId: '',
-    priority: 'medium', due: '', waitingOn: '',
+    priority: 'medium', due: '', waitingOn: '', url: '', attachments: [],
     createdAt: serverTimestamp(), completedAt: null,
     ...data,
   });

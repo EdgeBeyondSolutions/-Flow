@@ -10,9 +10,12 @@ export function taskCardHTML(task) {
   const tags = [];
   if (proj) tags.push(`<span class="tag tag-project">🗂 ${escapeHtml(proj.name)}</span>`);
   if (ctx) tags.push(`<span class="tag tag-context" style="color:${ctx.color}">● ${escapeHtml(ctx.name)}</span>`);
-  if (task.priority === 'high') tags.push(`<span class="tag tag-priority-high">High</span>`);
-  if (task.status === 'waiting' && task.waitingOn) tags.push(`<span class="tag tag-waiting">⏳ ${escapeHtml(task.waitingOn)}</span>`);
+  if (task.priority === 'critical') tags.push(`<span class="tag tag-priority-critical">Critical</span>`);
+  else if (task.priority === 'high') tags.push(`<span class="tag tag-priority-high">High</span>`);
+  if (task.waitingOn) tags.push(`<span class="tag tag-waiting">⏳ ${escapeHtml(task.waitingOn)}</span>`);
   if (task.due) tags.push(`<span class="tag tag-due ${overdue ? 'overdue' : ''}">📅 ${formatDue(task.due)}</span>`);
+  if (task.url) tags.push(`<span class="tag tag-url">🔗 Link</span>`);
+  if (task.attachments && task.attachments.length) tags.push(`<span class="tag tag-attachments">📎 ${task.attachments.length}</span>`);
 
   return `
     <div class="task-card ${done ? 'done' : ''}" draggable="true" data-id="${task.id}">

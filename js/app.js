@@ -155,9 +155,9 @@ function render() {
 
   const today = todayISO();
   document.getElementById('count-inbox').textContent = state.tasks.filter((t) => t.status === 'inbox').length;
-  document.getElementById('count-today').textContent = state.tasks.filter((t) => t.due === today && t.status !== 'done').length;
-  document.getElementById('count-scheduled').textContent = state.tasks.filter((t) => !!t.due && t.status !== 'done').length;
-  document.getElementById('count-next').textContent = state.tasks.filter((t) => t.status === 'next' && !t.due).length;
+  document.getElementById('count-today').textContent = state.tasks.filter((t) => t.status === 'scheduled' && t.due === today).length;
+  document.getElementById('count-scheduled').textContent = state.tasks.filter((t) => t.status === 'scheduled').length;
+  document.getElementById('count-next').textContent = state.tasks.filter((t) => t.status === 'next').length;
   document.getElementById('count-waiting').textContent = state.tasks.filter((t) => t.status === 'waiting').length;
   document.getElementById('count-someday').textContent = state.tasks.filter((t) => t.status === 'someday').length;
   document.getElementById('count-projects').textContent = state.projects.length;
@@ -281,6 +281,9 @@ async function toggleDone(task) {
 const drawer = document.getElementById('task-drawer');
 const taskForm = document.getElementById('task-form');
 const titleInput = document.getElementById('task-title');
+const MAX_ATTACHMENT_BYTES = 700 * 1024;
+const MAX_TOTAL_ATTACHMENT_BYTES = 900 * 1024;
+let pendingAttachments = [];
 
 function openTaskDrawer(id, defaults = {}) {
   taskForm.reset();
@@ -295,18 +298,91 @@ function openTaskDrawer(id, defaults = {}) {
     document.getElementById('task-priority').value = t.priority || 'medium';
     document.getElementById('task-due').value = t.due || '';
     document.getElementById('task-waiting-on').value = t.waitingOn || '';
+    document.getElementById('task-url').value = t.url || '';
     document.getElementById('task-notes').value = t.notes || '';
     document.getElementById('task-delete').hidden = false;
+    pendingAttachments = Array.isArray(t.attachments) ? [...t.attachments] : [];
   } else {
     document.getElementById('task-status').value = defaults.status || 'inbox';
     document.getElementById('task-project').value = defaults.projectId || '';
     document.getElementById('task-priority').value = 'medium';
     document.getElementById('task-delete').hidden = true;
+    pendingAttachments = [];
   }
+  renderAttachmentList();
   toggleConditionalFields();
   drawer.hidden = false;
   setTimeout(() => { titleInput.focus(); autoResize(titleInput); }, 30);
 }
+
+function fileIcon(type) {
+  if (type.startsWith('image/')) return '🖼';
+  if (type === 'application/pdf') return '📄';
+  return '📎';
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  return Math.round(bytes / 1024) + ' KB';
+}
+
+function renderAttachmentList() {
+  const el = document.getElementById('attachment-list');
+  el.innerHTML = pendingAttachments.map((a, i) => `
+    <div class="attachment-item">
+      ${a.type.startsWith('image/')
+        ? `<img class="attachment-thumb" src="${a.data}" alt="" />`
+        : `<div class="attachment-thumb">${fileIcon(a.type)}</div>`}
+      <div class="attachment-info">
+        <div class="attachment-name">${escapeHtml(a.name)}</div>
+        <div class="attachment-size">${formatBytes(a.size)}</div>
+      </div>
+      <div class="attachment-actions">
+        <a class="icon-btn" href="${a.data}" download="${escapeHtml(a.name)}" title="Download">⬇</a>
+        <button type="button" class="icon-btn" data-action="remove-attachment" data-index="${i}" title="Remove">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('attach-file-btn').addEventListener('click', () => {
+  document.getElementById('task-file-input').click();
+});
+
+document.getElementById('task-file-input').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  const statusEl = document.getElementById('attachment-upload-status');
+  for (const file of files) {
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      showToast(`${file.name} is too large (max ~${Math.round(MAX_ATTACHMENT_BYTES / 1024)}KB)`);
+      continue;
+    }
+    const currentTotal = pendingAttachments.reduce((sum, a) => sum + a.size, 0);
+    if (currentTotal + file.size > MAX_TOTAL_ATTACHMENT_BYTES) {
+      showToast('Attachment size limit reached for this task');
+      break;
+    }
+    statusEl.hidden = false;
+    statusEl.textContent = `Reading ${file.name}…`;
+    const data = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    pendingAttachments.push({ name: file.name, type: file.type || 'application/octet-stream', size: file.size, data });
+  }
+  statusEl.hidden = true;
+  renderAttachmentList();
+});
+
+document.getElementById('attachment-list').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action="remove-attachment"]');
+  if (!btn) return;
+  pendingAttachments.splice(Number(btn.dataset.index), 1);
+  renderAttachmentList();
+});
 
 function closeDrawer() { drawer.hidden = true; }
 document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
@@ -332,7 +408,9 @@ taskForm.addEventListener('submit', async (e) => {
     priority: document.getElementById('task-priority').value,
     due: document.getElementById('task-due').value,
     waitingOn: status === 'waiting' ? document.getElementById('task-waiting-on').value.trim() : '',
+    url: document.getElementById('task-url').value.trim(),
     notes: document.getElementById('task-notes').value,
+    attachments: pendingAttachments,
   };
   if (!data.title) return;
   if (status === 'done') data.completedAt = new Date();
