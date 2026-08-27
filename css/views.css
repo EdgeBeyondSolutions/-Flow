@@ -25,9 +25,11 @@
   color: var(--text-tertiary);
 }
 .col-name { flex: 1; min-width: 0; }
-.col-context { width: 220px; flex-shrink: 0; }
 .col-due { width: 90px; flex-shrink: 0; }
 .col-priority { width: 110px; flex-shrink: 0; }
+.col-owner { width: 140px; flex-shrink: 0; }
+.col-context { width: 130px; flex-shrink: 0; }
+.col-project { width: 160px; flex-shrink: 0; }
 
 .task-row {
   display: flex; align-items: center; gap: 12px; padding: 10px 14px;
@@ -53,9 +55,11 @@
 .task-row-tags-mobile { display: none; flex-wrap: wrap; gap: 6px; }
 
 .task-row-col { flex-shrink: 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.task-row-col-context { width: 220px; }
 .task-row-col-due { width: 90px; }
 .task-row-col-priority { width: 110px; }
+.task-row-col-owner { width: 140px; }
+.task-row-col-context { width: 130px; }
+.task-row-col-project { width: 160px; }
 
 .row-due { font-size: 12px; font-family: var(--font-mono); color: var(--text-secondary); }
 .row-due.overdue { color: var(--danger); font-weight: 700; }
