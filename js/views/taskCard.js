@@ -1,5 +1,42 @@
 import { escapeHtml, formatDue, formatDueShort, isOverdue, priorityLabel } from '../util.js';
-import { contextById, projectById } from '../state.js';
+import { state, contextById, projectById } from '../state.js';
+
+const PRIORITY_RANK = { critical: 3, high: 2, medium: 1, low: 0 };
+
+function sortValue(task, column) {
+  switch (column) {
+    case 'name': return (task.title || '').toLowerCase();
+    case 'due': return task.due || '';
+    case 'priority': return PRIORITY_RANK[task.priority] ?? 1;
+    case 'owner': return (task.waitingOn || '').toLowerCase();
+    case 'context': return (contextById(task.context)?.name || '').toLowerCase();
+    case 'project': return (projectById(task.projectId)?.name || '').toLowerCase();
+    default: return '';
+  }
+}
+
+function sortTasks(tasks, sort) {
+  if (!sort.column) return tasks;
+  const sorted = [...tasks].sort((a, b) => {
+    const va = sortValue(a, sort.column);
+    const vb = sortValue(b, sort.column);
+    const aEmpty = va === '' || va === null || va === undefined;
+    const bEmpty = vb === '' || vb === null || vb === undefined;
+    if (aEmpty && !bEmpty) return 1;
+    if (bEmpty && !aEmpty) return -1;
+    if (va < vb) return -1;
+    if (va > vb) return 1;
+    return 0;
+  });
+  if (sort.dir === 'desc') sorted.reverse();
+  return sorted;
+}
+
+function sortableColHTML(label, column) {
+  const active = state.sort.column === column;
+  const arrow = active ? (state.sort.dir === 'asc' ? '▲' : '▼') : '';
+  return `<span class="col-sortable ${active ? 'active' : ''}" data-action="sort-column" data-column="${column}">${label}${arrow ? ` <span class="col-sort-arrow">${arrow}</span>` : ''}</span>`;
+}
 
 export function taskCardHTML(task) {
   const ctx = task.context ? contextById(task.context) : null;
@@ -83,6 +120,7 @@ export function taskRowHTML(task) {
 }
 
 export function taskTableHTML(tasks, groupLabel) {
+  const sorted = sortTasks(tasks, state.sort);
   return `
     <div class="task-table">
       <div class="task-table-header" data-action="toggle-group">
@@ -92,14 +130,14 @@ export function taskTableHTML(tasks, groupLabel) {
       </div>
       <div class="task-table-body">
         <div class="task-table-columns">
-          <span class="col-name">Name</span>
-          <span class="col-due">Due date</span>
-          <span class="col-priority">Priority</span>
-          <span class="col-owner">Owner</span>
-          <span class="col-context">Context</span>
-          <span class="col-project">Project</span>
+          <span class="col-name">${sortableColHTML('Name', 'name')}</span>
+          <span class="col-due">${sortableColHTML('Due date', 'due')}</span>
+          <span class="col-priority">${sortableColHTML('Priority', 'priority')}</span>
+          <span class="col-owner">${sortableColHTML('Owner', 'owner')}</span>
+          <span class="col-context">${sortableColHTML('Context', 'context')}</span>
+          <span class="col-project">${sortableColHTML('Project', 'project')}</span>
         </div>
-        ${tasks.map(taskRowHTML).join('')}
+        ${sorted.map(taskRowHTML).join('')}
       </div>
     </div>
   `;

@@ -9,6 +9,7 @@ export const state = {
   selectedProjectId: null,
   calendarCursor: new Date(),
   reviewChecked: new Set(),
+  sort: { column: null, dir: 'asc' },
 };
 
 const renderListeners = new Set();
