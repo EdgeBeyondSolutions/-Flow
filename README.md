@@ -82,6 +82,30 @@ Then in GitHub: **Settings → Pages → Source → Deploy from a branch → mai
 - **Reflect** — use the Weekly review every week to keep the system trustworthy.
 - **Engage** — the board view in Next actions, grouped by context.
 
+## Google Calendar sync
+
+Click **Connect Google Calendar** in the Calendar view (sign in with the same
+Google account across all your devices). This uses a client-only OAuth flow —
+no backend, no Firebase Blaze plan required. Once connected:
+
+- **Manage calendars** lets you pick which of your Google calendars Flow reads
+  events from, and which one new Scheduled tasks with a time get written to.
+- A Scheduled task with a **Time** set gets a matching event created (or
+  updated/deleted) in your chosen Google calendar.
+- Before saving a timed Scheduled task, Flow checks it against your other
+  Scheduled tasks and synced Google events that day, and warns you if it
+  overlaps with something.
+- The access token is short-lived (~1 hour) and isn't persisted — Flow tries a
+  silent reconnect on load if you've connected before, but you may
+  occasionally need to click Connect again.
+
+**Reminders are intentionally not reinvented here.** Google Calendar (and
+Apple Calendar, if synced to the same account) already sends a notification
+some minutes before an event, on every device, for free. Building that
+ourselves would need a background service (Firebase Cloud Functions +
+Scheduler), which requires the paid Blaze plan — skipped for the same reason
+as file-attachment Cloud Storage.
+
 ## Keyboard shortcuts
 
 - `C` — quick capture
