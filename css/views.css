@@ -149,6 +149,15 @@
 }
 .calendar-task:hover { background: var(--accent-soft); color: var(--accent); }
 .calendar-task.overdue { background: var(--danger-soft); color: var(--danger); }
+.calendar-gevent { background: var(--someday-soft); color: var(--someday); cursor: default; }
+.calendar-gevent:hover { background: var(--someday-soft); color: var(--someday); }
+
+.gcal-cal-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 4px; border-bottom: 1px solid var(--border);
+}
+.gcal-cal-item:last-child { border-bottom: none; }
+.gcal-cal-name { flex: 1; font-size: 13.5px; }
+.gcal-write-radio { flex-shrink: 0; }
 
 /* ---------- Weekly review ---------- */
 .review-wrap { max-width: 640px; }

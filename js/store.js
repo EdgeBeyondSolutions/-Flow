@@ -1,6 +1,6 @@
 import {
   db, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot,
-  query, orderBy, serverTimestamp, writeBatch,
+  query, orderBy, serverTimestamp, writeBatch, setDoc,
 } from './firebase.js';
 
 const DEFAULT_CONTEXTS = [
@@ -55,7 +55,9 @@ export function subscribeContexts(cb) {
 export function createTask(data) {
   return addDoc(col('tasks'), {
     title: '', notes: '', status: 'inbox', context: '', projectId: '',
-    priority: 'medium', due: '', waitingOn: '', url: '', attachments: [],
+    priority: 'medium', due: '', dueTime: '', durationMinutes: 30,
+    waitingOn: '', url: '', attachments: [],
+    gcalEventId: '', gcalCalendarId: '',
     createdAt: serverTimestamp(), completedAt: null,
     ...data,
   });
@@ -89,4 +91,16 @@ export function createContext(data) {
 
 export function deleteContext(id) {
   return deleteDoc(doc(col('contexts'), id));
+}
+
+function settingsDoc() { return doc(db, 'users', uid, 'settings', 'googleCalendar'); }
+
+export function subscribeCalendarSettings(cb) {
+  return onSnapshot(settingsDoc(), (snap) => {
+    cb(snap.exists() ? snap.data() : { syncedCalendarIds: [], writeCalendarId: '' });
+  });
+}
+
+export function updateCalendarSettings(data) {
+  return setDoc(settingsDoc(), data, { merge: true });
 }

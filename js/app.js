@@ -5,7 +5,9 @@ import {
 import {
   setUid, seedDefaultsIfNeeded, subscribeTasks, subscribeProjects, subscribeContexts,
   createTask, updateTask, deleteTask, createProject, updateProject, createContext,
+  subscribeCalendarSettings, updateCalendarSettings,
 } from './store.js';
+import * as gcal from './gcal.js';
 import { state, notify, onStateChange } from './state.js';
 import { renderInbox, renderToday, renderScheduled, renderNextList, renderNextBoard, renderWaiting, renderSomeday, renderDone } from './views/lists.js';
 import { renderProjectsGrid, renderProjectDetail } from './views/projects.js';
@@ -109,6 +111,19 @@ function boot() {
     }
     render();
   }));
+  unsubscribers.push(subscribeCalendarSettings((settings) => {
+    state.gcalSettings = settings;
+    render();
+    refreshGcalEvents();
+  }));
+
+  if (localStorage.getItem('gcal_ever_connected') === '1') {
+    gcal.connect(false).then(() => {
+      state.gcalConnected = true;
+      render();
+      refreshGcalEvents();
+    }).catch(() => {});
+  }
 }
 
 // ───────────────────────── Navigation ─────────────────────────
@@ -210,6 +225,13 @@ function renderTaskFormOptions() {
   projSelect.innerHTML = '<option value="">— None —</option>' +
     state.projects.map((p) => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
   projSelect.value = currentProj;
+
+  const gcalSelect = document.getElementById('task-gcal-calendar');
+  const currentGcal = gcalSelect.value;
+  const syncedCals = state.gcalCalendars.filter((c) => state.gcalSettings.syncedCalendarIds.includes(c.id));
+  gcalSelect.innerHTML = '<option value="">— Don\'t sync —</option>' +
+    syncedCals.map((c) => `<option value="${c.id}">${escapeHtml(c.summary)}</option>`).join('');
+  gcalSelect.value = currentGcal;
 }
 
 // ───────────────────────── Body click delegation ─────────────────────────
@@ -251,11 +273,14 @@ document.getElementById('view-body').addEventListener('click', (e) => {
   if (addTaskToProject) { openTaskDrawer(null, { projectId: addTaskToProject.dataset.id, status: 'next' }); return; }
 
   const calPrev = e.target.closest('[data-action="cal-prev"]');
-  if (calPrev) { state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() - 1, 1); render(); return; }
+  if (calPrev) { state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() - 1, 1); render(); refreshGcalEvents(); return; }
   const calNext = e.target.closest('[data-action="cal-next"]');
-  if (calNext) { state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() + 1, 1); render(); return; }
+  if (calNext) { state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() + 1, 1); render(); refreshGcalEvents(); return; }
   const calToday = e.target.closest('[data-action="cal-today"]');
-  if (calToday) { state.calendarCursor = new Date(); render(); return; }
+  if (calToday) { state.calendarCursor = new Date(); render(); refreshGcalEvents(); return; }
+
+  const openGcalModal = e.target.closest('[data-action="open-gcal-modal"]');
+  if (openGcalModal) { openGcalSettingsModal(); return; }
 });
 
 document.getElementById('view-body').addEventListener('change', (e) => {
@@ -309,17 +334,24 @@ function openTaskDrawer(id, defaults = {}) {
     document.getElementById('task-project').value = t.projectId || '';
     document.getElementById('task-priority').value = t.priority || 'medium';
     document.getElementById('task-due').value = t.due || '';
+    document.getElementById('task-time').value = t.dueTime || '';
+    document.getElementById('task-duration').value = t.durationMinutes || 30;
     document.getElementById('task-waiting-on').value = t.waitingOn || '';
     document.getElementById('task-url').value = t.url || '';
     document.getElementById('task-notes').value = t.notes || '';
     document.getElementById('task-delete').hidden = false;
     pendingAttachments = Array.isArray(t.attachments) ? [...t.attachments] : [];
+    renderTaskFormOptions();
+    document.getElementById('task-gcal-calendar').value = t.gcalCalendarId || '';
   } else {
     document.getElementById('task-status').value = defaults.status || 'inbox';
     document.getElementById('task-project').value = defaults.projectId || '';
     document.getElementById('task-priority').value = 'medium';
+    document.getElementById('task-duration').value = 30;
     document.getElementById('task-delete').hidden = true;
     pendingAttachments = [];
+    renderTaskFormOptions();
+    document.getElementById('task-gcal-calendar').value = state.gcalSettings.writeCalendarId || '';
   }
   renderAttachmentList();
   toggleConditionalFields();
@@ -404,14 +436,73 @@ titleInput.addEventListener('input', () => autoResize(titleInput));
 document.getElementById('task-status').addEventListener('change', toggleConditionalFields);
 function toggleConditionalFields() {
   const status = document.getElementById('task-status').value;
-  document.getElementById('waiting-field-row').hidden = status !== 'waiting';
   document.getElementById('project-field-row').hidden = status === 'inbox';
+  const scheduled = status === 'scheduled';
+  document.getElementById('time-field-row').hidden = !scheduled;
+  document.getElementById('duration-field-row').hidden = !scheduled;
+  document.getElementById('gcal-field-row').hidden = !scheduled || !state.gcalConnected;
+}
+
+function timeRangesOverlap(aStart, aEnd, bStart, bEnd) {
+  return aStart < bEnd && bStart < aEnd;
+}
+
+function findConflicts(taskId, due, dueTime, durationMinutes) {
+  if (!due || !dueTime) return [];
+  const start = new Date(`${due}T${dueTime}:00`);
+  const end = new Date(start.getTime() + durationMinutes * 60000);
+  const conflicts = [];
+
+  state.tasks.forEach((t) => {
+    if (t.id === taskId || t.status !== 'scheduled' || t.due !== due || !t.dueTime) return;
+    const tStart = new Date(`${t.due}T${t.dueTime}:00`);
+    const tEnd = new Date(tStart.getTime() + (t.durationMinutes || 30) * 60000);
+    if (timeRangesOverlap(start, end, tStart, tEnd)) conflicts.push(t.title);
+  });
+
+  (state.gcalEventsByDate[due] || []).forEach((ev) => {
+    const evStart = ev.start?.dateTime ? new Date(ev.start.dateTime) : null;
+    const evEnd = ev.end?.dateTime ? new Date(ev.end.dateTime) : null;
+    if (evStart && evEnd && timeRangesOverlap(start, end, evStart, evEnd)) conflicts.push(ev.summary || '(no title)');
+  });
+
+  return conflicts;
+}
+
+async function syncTaskToGoogleCalendar(taskId, data, previous) {
+  const wantsSync = data.status === 'scheduled' && data.dueTime && data.gcalCalendarId;
+  const hadEvent = previous?.gcalEventId && previous?.gcalCalendarId;
+
+  if (!wantsSync) {
+    if (hadEvent) await gcal.deleteEvent(previous.gcalCalendarId, previous.gcalEventId);
+    return { gcalEventId: '', gcalCalendarId: '' };
+  }
+
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const startDate = new Date(`${data.due}T${data.dueTime}:00`);
+  const endDate = new Date(startDate.getTime() + data.durationMinutes * 60000);
+  const event = {
+    summary: data.title,
+    description: data.notes || '',
+    start: { dateTime: startDate.toISOString(), timeZone: tz },
+    end: { dateTime: endDate.toISOString(), timeZone: tz },
+  };
+
+  if (hadEvent && previous.gcalCalendarId === data.gcalCalendarId) {
+    await gcal.updateEvent(data.gcalCalendarId, previous.gcalEventId, event);
+    return { gcalEventId: previous.gcalEventId, gcalCalendarId: data.gcalCalendarId };
+  }
+  if (hadEvent) await gcal.deleteEvent(previous.gcalCalendarId, previous.gcalEventId);
+  const created = await gcal.createEvent(data.gcalCalendarId, event);
+  return { gcalEventId: created.id, gcalCalendarId: data.gcalCalendarId };
 }
 
 taskForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('task-id').value;
   const status = document.getElementById('task-status').value;
+  const dueTime = status === 'scheduled' ? document.getElementById('task-time').value : '';
+  const durationMinutes = Number(document.getElementById('task-duration').value) || 30;
   const data = {
     title: titleInput.value.trim(),
     status,
@@ -419,13 +510,31 @@ taskForm.addEventListener('submit', async (e) => {
     projectId: status === 'inbox' ? '' : document.getElementById('task-project').value,
     priority: document.getElementById('task-priority').value,
     due: document.getElementById('task-due').value,
-    waitingOn: status === 'waiting' ? document.getElementById('task-waiting-on').value.trim() : '',
+    dueTime,
+    durationMinutes,
+    waitingOn: document.getElementById('task-waiting-on').value.trim(),
     url: document.getElementById('task-url').value.trim(),
     notes: document.getElementById('task-notes').value,
     attachments: pendingAttachments,
+    gcalCalendarId: status === 'scheduled' ? document.getElementById('task-gcal-calendar').value : '',
   };
   if (!data.title) return;
   if (status === 'done') data.completedAt = new Date();
+
+  if (dueTime) {
+    const conflicts = findConflicts(id, data.due, dueTime, durationMinutes);
+    if (conflicts.length && !confirm(`This overlaps with: ${conflicts.join(', ')}. Save anyway?`)) return;
+  }
+
+  const previous = id ? state.tasks.find((t) => t.id === id) : null;
+
+  try {
+    const gcalResult = await syncTaskToGoogleCalendar(id, data, previous);
+    Object.assign(data, gcalResult);
+  } catch (err) {
+    showToast('Google Calendar sync failed — saved locally only');
+  }
+
   if (id) await updateTask(id, data);
   else await createTask(data);
   closeDrawer();
@@ -436,6 +545,8 @@ document.getElementById('task-delete').addEventListener('click', async () => {
   const id = document.getElementById('task-id').value;
   if (!id) return;
   if (!confirm('Delete this task? This cannot be undone.')) return;
+  const t = state.tasks.find((x) => x.id === id);
+  if (t?.gcalEventId && t?.gcalCalendarId) await gcal.deleteEvent(t.gcalCalendarId, t.gcalEventId);
   await deleteTask(id);
   closeDrawer();
   showToast('Task deleted');
@@ -502,8 +613,10 @@ document.getElementById('context-form').addEventListener('submit', async (e) => 
 // ───────────────────────── Quick capture ─────────────────────────
 const captureModal = document.getElementById('capture-modal');
 const captureInput = document.getElementById('capture-input');
+const captureStatus = document.getElementById('capture-status');
 function openCapture() {
   captureInput.value = '';
+  captureStatus.value = 'inbox';
   captureModal.hidden = false;
   setTimeout(() => captureInput.focus(), 30);
 }
@@ -514,8 +627,9 @@ document.getElementById('capture-form').addEventListener('submit', async (e) => 
   e.preventDefault();
   const title = captureInput.value.trim();
   if (!title) { closeCapture(); return; }
-  await createTask({ title, status: 'inbox' });
-  showToast('Captured to Inbox');
+  const status = captureStatus.value;
+  await createTask({ title, status });
+  showToast(status === 'inbox' ? 'Captured to Inbox' : `Captured to ${viewTitles[status] || status}`);
   captureInput.value = '';
   captureInput.focus();
 });
@@ -525,7 +639,7 @@ document.addEventListener('keydown', (e) => {
   const tag = document.activeElement.tagName;
   const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
   if (e.key === 'Escape') {
-    closeDrawer(); closeProjectModal(); closeContextModal(); closeCapture(); closeMobileNav();
+    closeDrawer(); closeProjectModal(); closeContextModal(); closeCapture(); closeMobileNav(); closeGcalModal();
     return;
   }
   if (typing) return;
@@ -553,6 +667,100 @@ function attachDragAndDrop() {
     });
   });
 }
+
+// ───────────────────────── Google Calendar ─────────────────────────
+async function refreshGcalEvents() {
+  if (!state.gcalConnected || !state.gcalSettings.syncedCalendarIds?.length) {
+    state.gcalEventsByDate = {};
+    if (state.view === 'calendar') render();
+    return;
+  }
+  const cursor = state.calendarCursor;
+  const rangeStart = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1);
+  const rangeEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 2, 0);
+  try {
+    const events = await gcal.listEventsFromCalendars(
+      state.gcalSettings.syncedCalendarIds, rangeStart.toISOString(), rangeEnd.toISOString()
+    );
+    const byDate = {};
+    events.forEach((ev) => {
+      const dateStr = (ev.start?.dateTime || ev.start?.date || '').slice(0, 10);
+      if (!dateStr) return;
+      (byDate[dateStr] ||= []).push(ev);
+    });
+    state.gcalEventsByDate = byDate;
+  } catch {
+    // token likely expired; user will need to reconnect via the modal
+  }
+  if (state.view === 'calendar') render();
+}
+
+const gcalModal = document.getElementById('gcal-modal');
+let gcalModalCalendars = [];
+let gcalModalSelected = new Set();
+let gcalModalWriteId = '';
+
+async function openGcalSettingsModal() {
+  gcalModal.hidden = false;
+  const body = document.getElementById('gcal-modal-body');
+  const saveBtn = document.getElementById('gcal-save');
+  saveBtn.hidden = true;
+  body.innerHTML = '<p style="font-size:13px;color:var(--text-secondary);">Connecting…</p>';
+
+  try {
+    if (!state.gcalConnected) {
+      await gcal.connect(true);
+      state.gcalConnected = true;
+      localStorage.setItem('gcal_ever_connected', '1');
+    }
+    gcalModalCalendars = await gcal.listCalendars();
+    state.gcalCalendars = gcalModalCalendars;
+    gcalModalSelected = new Set(state.gcalSettings.syncedCalendarIds || []);
+    gcalModalWriteId = state.gcalSettings.writeCalendarId || '';
+
+    body.innerHTML = `
+      <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;">
+        Pick which calendars Flow should read from, and which one new Scheduled tasks with a time get written to.
+      </p>
+      ${gcalModalCalendars.map((c) => `
+        <div class="gcal-cal-item">
+          <input type="checkbox" data-action="gcal-toggle-sync" data-id="${c.id}" ${gcalModalSelected.has(c.id) ? 'checked' : ''} />
+          <span class="gcal-cal-name">${escapeHtml(c.summary)}</span>
+          <label class="gcal-write-radio" style="font-size:12px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px;">
+            <input type="radio" name="gcal-write" data-action="gcal-set-write" data-id="${c.id}" ${gcalModalWriteId === c.id ? 'checked' : ''} /> write
+          </label>
+        </div>
+      `).join('')}
+    `;
+    saveBtn.hidden = false;
+    refreshGcalEvents();
+  } catch (err) {
+    body.innerHTML = `<p style="font-size:13px;color:var(--danger);">Could not connect to Google Calendar. Try again.</p>`;
+  }
+}
+
+document.getElementById('gcal-modal-body').addEventListener('change', (e) => {
+  const toggle = e.target.closest('[data-action="gcal-toggle-sync"]');
+  if (toggle) {
+    if (toggle.checked) gcalModalSelected.add(toggle.dataset.id);
+    else gcalModalSelected.delete(toggle.dataset.id);
+    return;
+  }
+  const writeRadio = e.target.closest('[data-action="gcal-set-write"]');
+  if (writeRadio) gcalModalWriteId = writeRadio.dataset.id;
+});
+
+document.getElementById('gcal-save').addEventListener('click', async () => {
+  const syncedCalendarIds = [...gcalModalSelected];
+  const writeCalendarId = syncedCalendarIds.includes(gcalModalWriteId) ? gcalModalWriteId : (syncedCalendarIds[0] || '');
+  await updateCalendarSettings({ syncedCalendarIds, writeCalendarId });
+  gcalModal.hidden = true;
+  showToast('Google Calendar settings saved');
+});
+
+function closeGcalModal() { gcalModal.hidden = true; }
+document.getElementById('gcal-modal-backdrop').addEventListener('click', closeGcalModal);
+document.getElementById('gcal-cancel').addEventListener('click', closeGcalModal);
 
 // ───────────────────────── Toast ─────────────────────────
 let toastTimer;

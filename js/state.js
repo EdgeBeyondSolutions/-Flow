@@ -10,6 +10,10 @@ export const state = {
   calendarCursor: new Date(),
   reviewChecked: new Set(),
   sort: { column: null, dir: 'asc' },
+  gcalConnected: false,
+  gcalSettings: { syncedCalendarIds: [], writeCalendarId: '' },
+  gcalCalendars: [],
+  gcalEventsByDate: {},
 };
 
 const renderListeners = new Set();

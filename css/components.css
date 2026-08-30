@@ -173,7 +173,9 @@
 .capture-panel input {
   font-size: 16px; padding: 16px 18px; border: none; background: transparent;
 }
-.capture-hint { font-size: 11px; color: var(--text-tertiary); padding: 0 18px 10px; }
+.capture-hint { font-size: 11px; color: var(--text-tertiary); }
+.capture-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 18px 12px; }
+.capture-footer select { width: auto; padding: 5px 10px; font-size: 12px; border-radius: 20px; }
 
 /* ---------- Toast ---------- */
 .toast {

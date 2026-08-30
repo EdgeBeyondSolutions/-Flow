@@ -29,9 +29,14 @@ export function renderCalendar() {
     const isToday = iso === today;
     const dayTasks = tasksByDate[iso] || [];
 
+    const gEvents = state.gcalEventsByDate[iso] || [];
+
     cells.push(`
-      <div class="calendar-cell ${otherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''} ${dayTasks.length ? 'has-tasks' : ''}">
+      <div class="calendar-cell ${otherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''} ${(dayTasks.length || gEvents.length) ? 'has-tasks' : ''}">
         <div class="calendar-date">${d.getDate()}</div>
+        ${gEvents.slice(0, 2).map((e) => `
+          <div class="calendar-task calendar-gevent" title="${escapeHtml(e.summary || '')}">📆 ${escapeHtml(e.summary || '(no title)')}</div>
+        `).join('')}
         ${dayTasks.slice(0, 3).map((t) => `
           <div class="calendar-task ${iso < today && t.status !== 'done' ? 'overdue' : ''}" data-action="open" data-id="${t.id}">${escapeHtml(t.title)}</div>
         `).join('')}
@@ -45,7 +50,10 @@ export function renderCalendar() {
       <button class="calendar-nav-btn" data-action="cal-prev">‹</button>
       <div class="calendar-month-label">${MONTHS[month]} ${year}</div>
       <button class="calendar-nav-btn" data-action="cal-next">›</button>
-      <button class="btn btn-ghost" data-action="cal-today" style="margin-left:auto;">Today</button>
+      <button class="btn btn-ghost" data-action="cal-today">Today</button>
+      <button class="btn btn-ghost" data-action="open-gcal-modal" style="margin-left:auto;">
+        ${state.gcalConnected ? '🔗 Manage calendars' : '🔗 Connect Google Calendar'}
+      </button>
     </div>
     <div class="calendar-grid">
       ${DOW.map((d) => `<div class="calendar-dow">${d}</div>`).join('')}

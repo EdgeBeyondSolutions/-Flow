@@ -160,9 +160,30 @@
         <input type="date" id="task-due" />
       </div>
 
+      <div class="field-row" id="time-field-row">
+        <label>Time</label>
+        <input type="time" id="task-time" />
+      </div>
+
+      <div class="field-row" id="duration-field-row">
+        <label>Duration</label>
+        <select id="task-duration">
+          <option value="15">15 min</option>
+          <option value="30" selected>30 min</option>
+          <option value="60">1 hour</option>
+          <option value="90">1.5 hours</option>
+          <option value="120">2 hours</option>
+        </select>
+      </div>
+
+      <div class="field-row" id="gcal-field-row">
+        <label>Sync to Google Calendar</label>
+        <select id="task-gcal-calendar"><option value="">— Don't sync —</option></select>
+      </div>
+
       <div class="field-row" id="waiting-field-row">
-        <label>Waiting on</label>
-        <input type="text" id="task-waiting-on" placeholder="Who / what?" />
+        <label>Owner</label>
+        <input type="text" id="task-waiting-on" placeholder="Who is this for / who's it with?" />
       </div>
 
       <div class="field-row full">
@@ -227,13 +248,35 @@
   </div>
 </div>
 
+<!-- GOOGLE CALENDAR SETTINGS MODAL -->
+<div id="gcal-modal" class="modal" hidden>
+  <div class="modal-backdrop" id="gcal-modal-backdrop"></div>
+  <div class="modal-panel">
+    <h2>Google Calendar</h2>
+    <div id="gcal-modal-body"></div>
+    <div class="modal-actions">
+      <button type="button" id="gcal-cancel" class="btn btn-ghost">Close</button>
+      <button type="button" id="gcal-save" class="btn btn-primary" hidden>Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- QUICK CAPTURE MODAL -->
 <div id="capture-modal" class="modal capture-modal" hidden>
   <div class="modal-backdrop" id="capture-modal-backdrop"></div>
   <div class="modal-panel capture-panel">
     <form id="capture-form">
       <input id="capture-input" type="text" placeholder="Capture whatever's on your mind…" autocomplete="off" />
-      <div class="capture-hint">Enter to save to Inbox · Esc to close</div>
+      <div class="capture-footer">
+        <select id="capture-status">
+          <option value="inbox" selected>Inbox</option>
+          <option value="next">Next action</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="waiting">Waiting for</option>
+          <option value="someday">Someday / Maybe</option>
+        </select>
+        <div class="capture-hint">Enter to save · Esc to close</div>
+      </div>
     </form>
   </div>
 </div>
