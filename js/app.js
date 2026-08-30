@@ -155,7 +155,7 @@ function render() {
 
   const today = todayISO();
   document.getElementById('count-inbox').textContent = state.tasks.filter((t) => t.status === 'inbox').length;
-  document.getElementById('count-today').textContent = state.tasks.filter((t) => t.status === 'scheduled' && t.due === today).length;
+  document.getElementById('count-today').textContent = state.tasks.filter((t) => t.status === 'scheduled' && t.due && t.due <= today).length;
   document.getElementById('count-scheduled').textContent = state.tasks.filter((t) => t.status === 'scheduled').length;
   document.getElementById('count-next').textContent = state.tasks.filter((t) => t.status === 'next').length;
   document.getElementById('count-waiting').textContent = state.tasks.filter((t) => t.status === 'waiting').length;

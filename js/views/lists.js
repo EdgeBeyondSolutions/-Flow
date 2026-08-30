@@ -4,9 +4,9 @@ import { todayISO } from '../util.js';
 
 export function renderToday() {
   const today = todayISO();
-  const tasks = filteredTasks((t) => t.status === 'scheduled' && t.due === today);
+  const tasks = filteredTasks((t) => t.status === 'scheduled' && t.due && t.due <= today);
   if (!tasks.length) {
-    return emptyStateHTML('☀️', 'Nothing due today', 'Scheduled tasks with a due date of today will show up here.');
+    return emptyStateHTML('☀️', 'Nothing due today', 'Scheduled tasks due today (or overdue) will show up here.');
   }
   return taskTableHTML(tasks, 'TODAY');
 }
