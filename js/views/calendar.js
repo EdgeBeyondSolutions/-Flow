@@ -33,7 +33,10 @@ export function renderCalendar() {
 
     cells.push(`
       <div class="calendar-cell ${otherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''} ${(dayTasks.length || gEvents.length) ? 'has-tasks' : ''}">
-        <div class="calendar-date">${d.getDate()}</div>
+        <div class="calendar-cell-top">
+          <div class="calendar-date">${d.getDate()}</div>
+          <button type="button" class="calendar-add-btn" data-action="add-task-on-date" data-date="${iso}" title="Add task on this date">+</button>
+        </div>
         ${gEvents.slice(0, 2).map((e) => `
           <div class="calendar-task calendar-gevent" title="${escapeHtml(e.summary || '')}">📆 ${escapeHtml(e.summary || '(no title)')}</div>
         `).join('')}

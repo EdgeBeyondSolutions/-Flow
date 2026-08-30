@@ -22,22 +22,18 @@ export function isOverdue(dueISO) {
   return dueISO < todayISO();
 }
 
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// Always renders as DD-Mon-YYYY (e.g. "13-Jun-2026") everywhere in the UI,
+// regardless of browser locale, so day/month order is never ambiguous.
 export function formatDue(dueISO) {
   if (!dueISO) return '';
   const [y, m, d] = dueISO.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+  return `${String(d).padStart(2, '0')}-${MONTH_ABBR[m - 1]}-${y}`;
 }
 
 export function priorityLabel(p) {
   return { critical: 'Critical', high: 'High', medium: 'Medium', low: 'Low' }[p] || 'Medium';
-}
-
-export function formatDueShort(dueISO) {
-  if (!dueISO) return '';
-  const [y, m, d] = dueISO.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
 }
 
 export function debounce(fn, ms) {

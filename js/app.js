@@ -272,6 +272,9 @@ document.getElementById('view-body').addEventListener('click', (e) => {
   const addTaskToProject = e.target.closest('[data-action="add-task-to-project"]');
   if (addTaskToProject) { openTaskDrawer(null, { projectId: addTaskToProject.dataset.id, status: 'next' }); return; }
 
+  const addOnDate = e.target.closest('[data-action="add-task-on-date"]');
+  if (addOnDate) { openTaskDrawer(null, { status: 'scheduled', due: addOnDate.dataset.date }); return; }
+
   const calPrev = e.target.closest('[data-action="cal-prev"]');
   if (calPrev) { state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() - 1, 1); render(); refreshGcalEvents(); return; }
   const calNext = e.target.closest('[data-action="cal-next"]');
@@ -347,6 +350,7 @@ function openTaskDrawer(id, defaults = {}) {
     document.getElementById('task-status').value = defaults.status || 'inbox';
     document.getElementById('task-project').value = defaults.projectId || '';
     document.getElementById('task-priority').value = 'medium';
+    document.getElementById('task-due').value = defaults.due || '';
     document.getElementById('task-duration').value = 30;
     document.getElementById('task-delete').hidden = true;
     pendingAttachments = [];

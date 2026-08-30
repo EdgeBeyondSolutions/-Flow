@@ -1,4 +1,4 @@
-import { escapeHtml, formatDue, formatDueShort, isOverdue, priorityLabel } from '../util.js';
+import { escapeHtml, formatDue, isOverdue, priorityLabel } from '../util.js';
 import { state, contextById, projectById } from '../state.js';
 
 const PRIORITY_RANK = { critical: 3, high: 2, medium: 1, low: 0 };
@@ -100,7 +100,7 @@ export function taskRowHTML(task) {
         </div>
       </div>
       <div class="task-row-col task-row-col-due">
-        ${task.due ? `<span class="row-due ${overdue ? 'overdue' : ''}">${formatDueShort(task.due)}</span>` : ''}
+        ${task.due ? `<span class="row-due ${overdue ? 'overdue' : ''}">${formatDue(task.due)}</span>` : ''}
       </div>
       <div class="task-row-col task-row-col-priority">
         <span class="row-priority row-priority-${task.priority || 'medium'}">🚩 ${priorityLabel(task.priority)}</span>
