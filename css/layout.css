@@ -42,7 +42,9 @@
   display: grid;
   grid-template-columns: 260px 1fr;
   overflow: hidden;
+  transition: grid-template-columns .18s var(--ease);
 }
+.app.sidebar-collapsed { grid-template-columns: 68px 1fr; }
 
 .sidebar {
   background: var(--surface);
@@ -52,12 +54,25 @@
   padding: 20px 14px;
   gap: 18px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar-top { display: flex; flex-direction: column; gap: 14px; }
 
-.brand { display: flex; align-items: center; padding: 0 6px; }
-.brand-word { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--accent); }
+.brand { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; gap: 6px; }
+.brand-word { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--accent); white-space: nowrap; }
+.sidebar-collapse-btn { flex-shrink: 0; }
+
+/* ---------- Collapsed sidebar (icons only) ---------- */
+.sidebar.collapsed { padding: 20px 10px; }
+.sidebar.collapsed .nav-label { display: none; }
+.sidebar.collapsed .brand { justify-content: center; }
+.sidebar.collapsed .nav-item { justify-content: center; padding: 9px; }
+.sidebar.collapsed .capture-btn { padding: 10px; }
+.sidebar.collapsed .context-pill-nav { justify-content: center; padding: 7px; }
+.sidebar.collapsed .sidebar-bottom { justify-content: center; }
+.sidebar.collapsed .sidebar-collapse-btn svg line { display: none; }
+.sidebar.collapsed .sidebar-collapse-btn svg { transform: scaleX(-1); }
 
 .nav { display: flex; flex-direction: column; gap: 2px; }
 

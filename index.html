@@ -43,48 +43,54 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <div class="brand">
-        <span class="brand-word">-Flow</span>
+        <span class="brand-word nav-label">-Flow</span>
+        <button id="sidebar-collapse-toggle" class="icon-btn sidebar-collapse-btn" title="Collapse sidebar">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1.5" y="2.5" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.3"/>
+            <line x1="6" y1="2.5" x2="6" y2="13.5" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+        </button>
       </div>
       <button id="capture-btn" class="capture-btn" title="Quick capture (C)">
-        <span class="plus">+</span> Capture
+        <span class="plus">+</span> <span class="nav-label">Capture</span>
       </button>
     </div>
 
     <nav class="nav" id="main-nav">
-      <button class="nav-item" data-view="inbox">
-        <span class="nav-icon">📥</span><span>Inbox</span><span class="nav-count" id="count-inbox">0</span>
+      <button class="nav-item" data-view="inbox" title="Inbox">
+        <span class="nav-icon">📥</span><span class="nav-label">Inbox</span><span class="nav-count nav-label" id="count-inbox">0</span>
       </button>
-      <button class="nav-item" data-view="today">
-        <span class="nav-icon">☀️</span><span>Today</span><span class="nav-count" id="count-today">0</span>
+      <button class="nav-item" data-view="today" title="Today">
+        <span class="nav-icon">☀️</span><span class="nav-label">Today</span><span class="nav-count nav-label" id="count-today">0</span>
       </button>
-      <button class="nav-item" data-view="scheduled">
-        <span class="nav-icon">🗓</span><span>Scheduled</span><span class="nav-count" id="count-scheduled">0</span>
+      <button class="nav-item" data-view="scheduled" title="Scheduled">
+        <span class="nav-icon">🗓</span><span class="nav-label">Scheduled</span><span class="nav-count nav-label" id="count-scheduled">0</span>
       </button>
-      <button class="nav-item" data-view="next">
-        <span class="nav-icon">⚡</span><span>Next actions</span><span class="nav-count" id="count-next">0</span>
+      <button class="nav-item" data-view="next" title="Next actions">
+        <span class="nav-icon">⚡</span><span class="nav-label">Next actions</span><span class="nav-count nav-label" id="count-next">0</span>
       </button>
-      <button class="nav-item" data-view="projects">
-        <span class="nav-icon">🗂</span><span>Projects</span><span class="nav-count" id="count-projects">0</span>
+      <button class="nav-item" data-view="projects" title="Projects">
+        <span class="nav-icon">🗂</span><span class="nav-label">Projects</span><span class="nav-count nav-label" id="count-projects">0</span>
       </button>
-      <button class="nav-item" data-view="waiting">
-        <span class="nav-icon">⏳</span><span>Waiting for</span><span class="nav-count" id="count-waiting">0</span>
+      <button class="nav-item" data-view="waiting" title="Waiting for">
+        <span class="nav-icon">⏳</span><span class="nav-label">Waiting for</span><span class="nav-count nav-label" id="count-waiting">0</span>
       </button>
-      <button class="nav-item" data-view="calendar">
-        <span class="nav-icon">📆</span><span>Calendar</span>
+      <button class="nav-item" data-view="calendar" title="Calendar">
+        <span class="nav-icon">📆</span><span class="nav-label">Calendar</span>
       </button>
-      <button class="nav-item" data-view="someday">
-        <span class="nav-icon">💭</span><span>Someday / Maybe</span><span class="nav-count" id="count-someday">0</span>
+      <button class="nav-item" data-view="someday" title="Someday / Maybe">
+        <span class="nav-icon">💭</span><span class="nav-label">Someday / Maybe</span><span class="nav-count nav-label" id="count-someday">0</span>
       </button>
-      <button class="nav-item" data-view="review">
-        <span class="nav-icon">🔄</span><span>Weekly review</span>
+      <button class="nav-item" data-view="review" title="Weekly review">
+        <span class="nav-icon">🔄</span><span class="nav-label">Weekly review</span>
       </button>
-      <button class="nav-item" data-view="done">
-        <span class="nav-icon">✅</span><span>Done</span>
+      <button class="nav-item" data-view="done" title="Done">
+        <span class="nav-icon">✅</span><span class="nav-label">Done</span>
       </button>
     </nav>
 
     <div class="sidebar-section">
-      <div class="sidebar-section-title">Contexts</div>
+      <div class="sidebar-section-title nav-label">Contexts</div>
       <div id="context-list" class="context-list"></div>
     </div>
 

@@ -35,6 +35,21 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
   applyTheme(next);
 });
 
+// ───────────────────────── Sidebar collapse ─────────────────────────
+const SIDEBAR_COLLAPSED_KEY = 'flow-sidebar-collapsed';
+function applySidebarCollapsed(collapsed) {
+  document.getElementById('app').classList.toggle('sidebar-collapsed', collapsed);
+  document.getElementById('sidebar').classList.toggle('collapsed', collapsed);
+  const btn = document.getElementById('sidebar-collapse-toggle');
+  btn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+}
+applySidebarCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1');
+document.getElementById('sidebar-collapse-toggle').addEventListener('click', () => {
+  const collapsed = !document.getElementById('sidebar').classList.contains('collapsed');
+  localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? '1' : '0');
+  applySidebarCollapsed(collapsed);
+});
+
 // ───────────────────────── Auth ─────────────────────────
 const authScreen = document.getElementById('auth-screen');
 const appEl = document.getElementById('app');
@@ -207,10 +222,10 @@ onStateChange(render);
 function renderContextNav() {
   const el = document.getElementById('context-list');
   el.innerHTML = state.contexts.map((c) => `
-    <button class="context-pill-nav" data-action="go-context-board" data-id="${c.id}">
-      <span class="context-dot" style="background:${c.color}"></span>${escapeHtml(c.name)}
+    <button class="context-pill-nav" data-action="go-context-board" data-id="${c.id}" title="${escapeHtml(c.name)}">
+      <span class="context-dot" style="background:${c.color}"></span><span class="nav-label">${escapeHtml(c.name)}</span>
     </button>
-  `).join('') + `<button class="context-add-btn" data-action="open-context-modal">+ New context</button>`;
+  `).join('') + `<button class="context-add-btn nav-label" data-action="open-context-modal">+ New context</button>`;
 }
 
 function renderTaskFormOptions() {
