@@ -130,10 +130,20 @@
 .back-link:hover { color: var(--accent); }
 
 /* ---------- Calendar ---------- */
-.calendar-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.cal-toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.cal-today-btn { flex-shrink: 0; }
+.cal-nav { display: flex; gap: 4px; }
 .calendar-nav-btn { width: 30px; height: 30px; border-radius: 50%; background: var(--surface-2); }
 .calendar-nav-btn:hover { background: var(--accent-soft); color: var(--accent); }
-.calendar-month-label { font-family: var(--font-display); font-weight: 700; font-size: 16px; min-width: 160px; text-align: center; }
+.cal-range-label { font-family: var(--font-display); font-weight: 700; font-size: 16px; white-space: nowrap; }
+.cal-view-select {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px;
+  padding: 6px 28px 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A93A6' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+
 .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
 .calendar-dow { text-align: center; font-size: 11px; color: var(--text-tertiary); font-weight: 700; padding-bottom: 6px; text-transform: uppercase; }
 .calendar-cell {
@@ -159,6 +169,50 @@
 .calendar-task.overdue { background: var(--danger-soft); color: var(--danger); }
 .calendar-gevent { background: var(--someday-soft); color: var(--someday); cursor: default; }
 .calendar-gevent:hover { background: var(--someday-soft); color: var(--someday); }
+
+/* ---------- Time grid (Day / Week) ---------- */
+.timegrid-wrap { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: var(--surface); }
+.timegrid-header { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 2; }
+.tg-gutter-spacer { width: 56px; flex-shrink: 0; }
+.tg-day-header { flex: 1; min-width: 0; text-align: center; padding: 8px 4px; border-left: 1px solid var(--border); }
+.tg-day-header-dow { font-size: 10.5px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .04em; }
+.tg-day-header-num {
+  font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-top: 2px;
+  width: 28px; height: 28px; line-height: 28px; border-radius: 50%; margin-inline: auto;
+}
+.tg-day-header-num.today { background: var(--accent); color: var(--accent-contrast); }
+
+.timegrid-scroll { display: flex; max-height: calc(100vh - 280px); min-height: 400px; overflow-y: auto; }
+.tg-gutter { width: 56px; flex-shrink: 0; }
+.tg-hour-label {
+  font-size: 10.5px; color: var(--text-tertiary); text-align: right; padding-right: 8px;
+  transform: translateY(-6px); box-sizing: border-box;
+}
+
+.tg-day-col-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; border-left: 1px solid var(--border); }
+.tg-allday-cell { padding: 3px; border-bottom: 1px solid var(--border); min-height: 22px; display: flex; flex-direction: column; gap: 3px; }
+.tg-allday-chip {
+  font-size: 10.5px; padding: 2px 6px; border-radius: 4px; background: var(--surface-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;
+}
+.tg-allday-chip.overdue { background: var(--danger-soft); color: var(--danger); }
+.tg-allday-chip.tg-gevent { background: var(--someday-soft); color: var(--someday); cursor: default; }
+
+.tg-day-col { position: relative; }
+.tg-hour-cell { border-bottom: 1px solid var(--border); box-sizing: border-box; cursor: pointer; }
+.tg-hour-cell:hover { background: var(--surface-2); }
+
+.tg-now-line { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--danger); z-index: 3; pointer-events: none; }
+.tg-now-dot { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); }
+
+.tg-event {
+  position: absolute; left: 3px; right: 3px; border-radius: 5px;
+  background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 600;
+  padding: 3px 6px; overflow: hidden; cursor: pointer; z-index: 1; box-shadow: 0 0 0 1px var(--surface);
+}
+.tg-event:hover { filter: brightness(1.05); z-index: 4; }
+.tg-event.overdue { background: var(--danger-soft); color: var(--danger); }
+.tg-event.tg-gevent { background: var(--someday-soft); color: var(--someday); cursor: default; }
 
 .gcal-cal-item {
   display: flex; align-items: center; gap: 10px; padding: 10px 4px; border-bottom: 1px solid var(--border);

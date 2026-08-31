@@ -216,7 +216,14 @@ function render() {
   }
 
   if (state.boardMode && state.view === 'next') attachDragAndDrop();
+  const calendarKey = state.view === 'calendar' ? `calendar:${state.calendarViewMode}` : state.view;
+  if (state.view === 'calendar' && state.calendarViewMode !== 'month' && calendarKey !== lastRenderedKey) {
+    const scroller = document.getElementById('timegrid-scroll');
+    if (scroller) scroller.scrollTop = 7 * 48;
+  }
+  lastRenderedKey = calendarKey;
 }
+let lastRenderedKey = null;
 onStateChange(render);
 
 function renderContextNav() {
@@ -288,12 +295,17 @@ document.getElementById('view-body').addEventListener('click', (e) => {
   if (addTaskToProject) { openTaskDrawer(null, { projectId: addTaskToProject.dataset.id, status: 'next' }); return; }
 
   const addOnDate = e.target.closest('[data-action="add-task-on-date"]');
-  if (addOnDate) { openTaskDrawer(null, { status: 'scheduled', due: addOnDate.dataset.date }); return; }
+  if (addOnDate) {
+    const hour = addOnDate.dataset.hour;
+    const dueTime = hour !== undefined ? `${String(hour).padStart(2, '0')}:00` : '';
+    openTaskDrawer(null, { status: 'scheduled', due: addOnDate.dataset.date, dueTime });
+    return;
+  }
 
   const calPrev = e.target.closest('[data-action="cal-prev"]');
-  if (calPrev) { state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() - 1, 1); render(); refreshGcalEvents(); return; }
+  if (calPrev) { stepCalendar(-1); render(); refreshGcalEvents(); return; }
   const calNext = e.target.closest('[data-action="cal-next"]');
-  if (calNext) { state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() + 1, 1); render(); refreshGcalEvents(); return; }
+  if (calNext) { stepCalendar(1); render(); refreshGcalEvents(); return; }
   const calToday = e.target.closest('[data-action="cal-today"]');
   if (calToday) { state.calendarCursor = new Date(); render(); refreshGcalEvents(); return; }
 
@@ -307,6 +319,13 @@ document.getElementById('view-body').addEventListener('change', (e) => {
     if (check.checked) state.reviewChecked.add(check.dataset.id);
     else state.reviewChecked.delete(check.dataset.id);
     render();
+    return;
+  }
+  const viewSelect = e.target.closest('[data-action="cal-view-select"]');
+  if (viewSelect) {
+    state.calendarViewMode = viewSelect.value;
+    render();
+    refreshGcalEvents();
   }
 });
 
@@ -366,6 +385,7 @@ function openTaskDrawer(id, defaults = {}) {
     document.getElementById('task-project').value = defaults.projectId || '';
     document.getElementById('task-priority').value = 'medium';
     document.getElementById('task-due').value = defaults.due || '';
+    document.getElementById('task-time').value = defaults.dueTime || '';
     document.getElementById('task-duration').value = 30;
     document.getElementById('task-delete').hidden = true;
     pendingAttachments = [];
@@ -685,6 +705,15 @@ function attachDragAndDrop() {
       await updateTask(id, { context });
     });
   });
+}
+
+// ───────────────────────── Calendar navigation ─────────────────────────
+function stepCalendar(dir) {
+  const c = state.calendarCursor;
+  const mode = state.calendarViewMode;
+  if (mode === 'day') state.calendarCursor = new Date(c.getFullYear(), c.getMonth(), c.getDate() + dir);
+  else if (mode === 'week') state.calendarCursor = new Date(c.getFullYear(), c.getMonth(), c.getDate() + dir * 7);
+  else state.calendarCursor = new Date(c.getFullYear(), c.getMonth() + dir, 1);
 }
 
 // ───────────────────────── Google Calendar ─────────────────────────

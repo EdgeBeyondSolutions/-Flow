@@ -8,6 +8,7 @@ export const state = {
   search: '',
   selectedProjectId: null,
   calendarCursor: new Date(),
+  calendarViewMode: 'week',
   reviewChecked: new Set(),
   sort: { column: null, dir: 'asc' },
   gcalConnected: false,
