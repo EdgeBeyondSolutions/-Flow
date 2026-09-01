@@ -129,16 +129,14 @@ function boot() {
   unsubscribers.push(subscribeCalendarSettings((settings) => {
     state.gcalSettings = settings;
     render();
-    refreshGcalEvents();
   }));
 
-  if (localStorage.getItem('gcal_ever_connected') === '1') {
-    gcal.connect(false).then(() => {
-      state.gcalConnected = true;
-      render();
-      refreshGcalEvents();
-    }).catch(() => {});
-  }
+  // Google's OAuth model has no way to restore a session silently and
+  // reliably across a page reload without a backend (which would need the
+  // paid Blaze plan). So we never auto-reconnect on boot — that used to
+  // pop an unprompted Google sign-in window on every refresh. Instead the
+  // user reconnects explicitly via "Manage calendars" when they want
+  // Google events synced again.
 }
 
 // ───────────────────────── Navigation ─────────────────────────
