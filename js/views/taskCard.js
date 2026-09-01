@@ -86,7 +86,7 @@ export function taskRowHTML(task) {
   if (task.attachments && task.attachments.length) extraTags.push(`<span class="tag tag-attachments">📎 ${task.attachments.length}</span>`);
 
   return `
-    <div class="task-row ${done ? 'done' : ''}" data-id="${task.id}">
+    <div class="task-row ${done ? 'done' : ''}" draggable="true" data-id="${task.id}">
       <div class="task-row-checkbox ${done ? 'checked' : ''}" data-action="toggle-done" data-id="${task.id}">${done ? '✓' : ''}</div>
       <div class="task-row-main" data-action="open" data-id="${task.id}">
         <div class="task-row-title">${escapeHtml(task.title)}</div>

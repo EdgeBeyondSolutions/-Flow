@@ -687,6 +687,48 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ───────────────────────── Drag & drop (board mode) ─────────────────────────
+// ───────────────────────── Drag tasks onto sidebar to change status ─────────────────────────
+document.getElementById('view-body').addEventListener('dragstart', (e) => {
+  const row = e.target.closest('.task-row, .task-card');
+  if (!row) return;
+  row.classList.add('dragging');
+});
+document.getElementById('view-body').addEventListener('dragend', (e) => {
+  const row = e.target.closest('.task-row, .task-card');
+  if (row) row.classList.remove('dragging');
+});
+
+const STATUS_BY_NAV_VIEW = { inbox: 'inbox', next: 'next', scheduled: 'scheduled', waiting: 'waiting', someday: 'someday', done: 'done' };
+document.getElementById('main-nav').addEventListener('dragover', (e) => {
+  const item = e.target.closest('.nav-item');
+  if (!item || !(STATUS_BY_NAV_VIEW[item.dataset.view] || item.dataset.view === 'today')) return;
+  e.preventDefault();
+  item.classList.add('nav-drop-target');
+});
+document.getElementById('main-nav').addEventListener('dragleave', (e) => {
+  const item = e.target.closest('.nav-item');
+  if (item) item.classList.remove('nav-drop-target');
+});
+document.getElementById('main-nav').addEventListener('drop', async (e) => {
+  const item = e.target.closest('.nav-item');
+  if (!item) return;
+  const view = item.dataset.view;
+  if (!(STATUS_BY_NAV_VIEW[view] || view === 'today')) return;
+  e.preventDefault();
+  item.classList.remove('nav-drop-target');
+  const dragging = document.querySelector('.task-row.dragging, .task-card.dragging');
+  if (!dragging) return;
+  const id = dragging.dataset.id;
+  const updates = {};
+  if (view === 'today') { updates.status = 'scheduled'; updates.due = todayISO(); }
+  else {
+    updates.status = STATUS_BY_NAV_VIEW[view];
+    if (view === 'done') updates.completedAt = new Date();
+  }
+  await updateTask(id, updates);
+  showToast('Moved to ' + (item.querySelector('.nav-label')?.textContent.trim() || view));
+});
+
 function attachDragAndDrop() {
   document.querySelectorAll('.task-card').forEach((card) => {
     card.addEventListener('dragstart', () => card.classList.add('dragging'));

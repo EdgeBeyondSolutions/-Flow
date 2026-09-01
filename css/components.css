@@ -40,6 +40,7 @@
 }
 .nav-item:hover { background: var(--surface-2); color: var(--text); }
 .nav-item.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.nav-item.nav-drop-target { background: var(--accent-soft); color: var(--accent); outline: 2px dashed var(--accent); outline-offset: -2px; }
 .nav-icon { font-size: 14px; width: 16px; text-align: center; }
 .nav-count {
   margin-left: auto; font-family: var(--font-mono); font-size: 11px;
