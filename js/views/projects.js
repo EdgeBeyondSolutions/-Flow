@@ -4,9 +4,9 @@ import { taskTableHTML, emptyStateHTML } from './taskCard.js';
 
 export function renderProjectsGrid() {
   const term = state.search.trim().toLowerCase();
-  const projects = state.projects.filter((p) =>
-    !term || p.name.toLowerCase().includes(term) || (p.outcome || '').toLowerCase().includes(term)
-  );
+  const projects = state.projects
+    .filter((p) => !term || p.name.toLowerCase().includes(term) || (p.outcome || '').toLowerCase().includes(term))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const cards = projects.map((p) => {
     const tasks = state.tasks.filter((t) => t.projectId === p.id);
