@@ -233,7 +233,7 @@ function renderContextNav() {
   `).join('') + `<button class="context-add-btn nav-label" data-action="open-context-modal">+ New context</button>`;
 }
 
-function renderTaskFormOptions() {
+function renderTaskFormOptions(targetGcalId) {
   const ctxSelect = document.getElementById('task-context');
   const current = ctxSelect.value;
   ctxSelect.innerHTML = '<option value="">— No context —</option>' +
@@ -247,10 +247,18 @@ function renderTaskFormOptions() {
   projSelect.value = currentProj;
 
   const gcalSelect = document.getElementById('task-gcal-calendar');
-  const currentGcal = gcalSelect.value;
+  const currentGcal = targetGcalId !== undefined ? targetGcalId : gcalSelect.value;
   const syncedCals = state.gcalCalendars.filter((c) => state.gcalSettings.syncedCalendarIds.includes(c.id));
+  let options = syncedCals;
+  // state.gcalCalendars is only populated after opening "Manage calendars" this
+  // session — without this, a task's already-saved calendar choice would have
+  // no matching <option> and silently revert to "Use default" on reopen.
+  if (currentGcal && !options.some((c) => c.id === currentGcal)) {
+    const known = state.gcalCalendars.find((c) => c.id === currentGcal);
+    options = [{ id: currentGcal, summary: known ? known.summary : `Selected calendar (${currentGcal})` }, ...options];
+  }
   gcalSelect.innerHTML = '<option value="">— Use default —</option>' +
-    syncedCals.map((c) => `<option value="${c.id}">${escapeHtml(c.summary)}</option>`).join('');
+    options.map((c) => `<option value="${c.id}">${escapeHtml(c.summary)}</option>`).join('');
   gcalSelect.value = currentGcal;
 }
 
@@ -436,8 +444,7 @@ function openTaskDrawer(id, defaults = {}) {
     document.getElementById('task-notes').value = t.notes || '';
     document.getElementById('task-delete').hidden = false;
     pendingAttachments = Array.isArray(t.attachments) ? [...t.attachments] : [];
-    renderTaskFormOptions();
-    document.getElementById('task-gcal-calendar').value = t.gcalCalendarId || '';
+    renderTaskFormOptions(t.gcalCalendarId || '');
     pendingReminders = Array.isArray(t.reminders) ? [...t.reminders] : (t.reminderMinutes ? [t.reminderMinutes] : []);
     renderReminderList();
   } else {
@@ -449,8 +456,7 @@ function openTaskDrawer(id, defaults = {}) {
     document.getElementById('task-duration').value = 30;
     document.getElementById('task-delete').hidden = true;
     pendingAttachments = [];
-    renderTaskFormOptions();
-    document.getElementById('task-gcal-calendar').value = '';
+    renderTaskFormOptions('');
     pendingReminders = defaults.reminders ? [...defaults.reminders] : [];
     renderReminderList();
   }
