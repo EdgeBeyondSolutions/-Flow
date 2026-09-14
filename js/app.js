@@ -131,12 +131,23 @@ function boot() {
     render();
   }));
 
-  // Google's OAuth model has no way to restore a session silently and
-  // reliably across a page reload without a backend (which would need the
-  // paid Blaze plan). So we never auto-reconnect on boot — that used to
-  // pop an unprompted Google sign-in window on every refresh. Instead the
-  // user reconnects explicitly via "Manage calendars" when they want
-  // Google events synced again.
+  // Silent (prompt:'') token requests show no UI by design — they either
+  // succeed quietly or fail quietly. Only interactive connects (the
+  // Connect/Manage calendars button) should ever show Google's account
+  // picker. This restores the Google connection on reload without asking
+  // again each time.
+  if (localStorage.getItem('gcal_ever_connected') === '1') {
+    gcal.connect(false).then(async () => {
+      state.gcalConnected = true;
+      try {
+        const cals = await gcal.listCalendars();
+        state.gcalCalendars = cals;
+        state.gcalAccountEmail = cals.find((c) => c.primary)?.id || '';
+      } catch { /* calendar list is optional here; sync still works without it */ }
+      render();
+      refreshGcalEvents();
+    }).catch(() => {});
+  }
 }
 
 // ───────────────────────── Navigation ─────────────────────────
@@ -148,10 +159,12 @@ const viewTitles = {
 document.getElementById('main-nav').addEventListener('click', (e) => {
   const btn = e.target.closest('.nav-item');
   if (!btn) return;
+  const enteringCalendar = btn.dataset.view === 'calendar' && state.view !== 'calendar';
   state.view = btn.dataset.view;
   state.selectedProjectId = null;
   closeMobileNav();
   render();
+  if (enteringCalendar) refreshGcalEvents();
 });
 
 document.getElementById('view-switch').addEventListener('click', (e) => {
@@ -317,6 +330,9 @@ document.getElementById('view-body').addEventListener('click', (e) => {
 
   const openGcalModal = e.target.closest('[data-action="open-gcal-modal"]');
   if (openGcalModal) { openGcalSettingsModal(); return; }
+
+  const refreshGcal = e.target.closest('[data-action="cal-refresh-gcal"]');
+  if (refreshGcal) { refreshGcalEvents(); showToast('Refreshing Google Calendar…'); return; }
 });
 
 document.getElementById('view-body').addEventListener('change', (e) => {

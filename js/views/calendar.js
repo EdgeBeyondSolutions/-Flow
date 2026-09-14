@@ -21,7 +21,8 @@ function toolbarHTML(rangeLabel) {
         <option value="week" ${state.calendarViewMode === 'week' ? 'selected' : ''}>Week</option>
         <option value="month" ${state.calendarViewMode === 'month' ? 'selected' : ''}>Month</option>
       </select>
-      <button class="btn btn-ghost" data-action="open-gcal-modal" style="margin-left:auto;">
+      ${state.gcalConnected ? '<button class="icon-btn" data-action="cal-refresh-gcal" title="Refresh Google Calendar events" style="margin-left:auto;">🔄</button>' : ''}
+      <button class="btn btn-ghost" data-action="open-gcal-modal" style="${state.gcalConnected ? '' : 'margin-left:auto;'}">
         ${state.gcalConnected ? `🔗 ${state.gcalAccountEmail || 'Manage calendars'}` : '🔗 Connect Google Calendar'}
       </button>
     </div>

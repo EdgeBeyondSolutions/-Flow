@@ -48,13 +48,23 @@ export async function connect(interactive = true) {
   });
 }
 
-async function ensureToken() {
+// Tokens expire hourly. A silent (prompt:'') refresh is attempted first and
+// never shows any UI; only when `interactive` is true do we fall back to an
+// account-picker prompt. Background reads (listing events to display) pass
+// interactive:false so an expired token never surprises the user with a
+// popup mid-session — it just skips that read until they reconnect.
+async function ensureToken(interactive = true) {
   if (isConnected()) return accessToken;
-  return connect(true);
+  try {
+    return await connect(false);
+  } catch {
+    if (interactive) return connect(true);
+    throw new Error('not connected');
+  }
 }
 
-async function apiFetch(path, opts = {}) {
-  const token = await ensureToken();
+async function apiFetch(path, opts = {}, interactive = true) {
+  const token = await ensureToken(interactive);
   const res = await fetch(`https://www.googleapis.com/calendar/v3${path}`, {
     ...opts,
     headers: { ...(opts.headers || {}), Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -68,16 +78,16 @@ export async function listCalendars() {
   return data.items || [];
 }
 
-export async function listEvents(calendarId, timeMinISO, timeMaxISO) {
+export async function listEvents(calendarId, timeMinISO, timeMaxISO, interactive = false) {
   const params = new URLSearchParams({ timeMin: timeMinISO, timeMax: timeMaxISO, singleEvents: 'true', orderBy: 'startTime' });
-  const data = await apiFetch(`/calendars/${encodeURIComponent(calendarId)}/events?${params}`);
+  const data = await apiFetch(`/calendars/${encodeURIComponent(calendarId)}/events?${params}`, {}, interactive);
   return data.items || [];
 }
 
 export async function listEventsFromCalendars(calendarIds, timeMinISO, timeMaxISO) {
   const results = await Promise.all(calendarIds.map(async (id) => {
     try {
-      const events = await listEvents(id, timeMinISO, timeMaxISO);
+      const events = await listEvents(id, timeMinISO, timeMaxISO, false);
       return events.map((e) => ({ ...e, __calendarId: id }));
     } catch {
       return [];
