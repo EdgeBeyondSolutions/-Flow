@@ -57,7 +57,7 @@ export function createTask(data) {
     title: '', notes: '', status: 'inbox', context: '', projectId: '',
     priority: 'medium', due: '', dueTime: '', durationMinutes: 30,
     waitingOn: '', url: '', attachments: [],
-    gcalEventId: '', gcalCalendarId: '',
+    gcalEventId: '', gcalCalendarId: '', reminderMinutes: 0,
     createdAt: serverTimestamp(), completedAt: null,
     ...data,
   });

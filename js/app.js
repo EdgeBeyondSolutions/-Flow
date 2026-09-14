@@ -378,6 +378,7 @@ function openTaskDrawer(id, defaults = {}) {
     pendingAttachments = Array.isArray(t.attachments) ? [...t.attachments] : [];
     renderTaskFormOptions();
     document.getElementById('task-gcal-calendar').value = t.gcalCalendarId || '';
+    document.getElementById('task-reminder').value = t.reminderMinutes || 0;
   } else {
     document.getElementById('task-status').value = defaults.status || 'inbox';
     document.getElementById('task-project').value = defaults.projectId || '';
@@ -389,6 +390,7 @@ function openTaskDrawer(id, defaults = {}) {
     pendingAttachments = [];
     renderTaskFormOptions();
     document.getElementById('task-gcal-calendar').value = state.gcalSettings.writeCalendarId || '';
+    document.getElementById('task-reminder').value = 0;
   }
   renderAttachmentList();
   toggleConditionalFields();
@@ -478,6 +480,7 @@ function toggleConditionalFields() {
   document.getElementById('time-field-row').hidden = !scheduled;
   document.getElementById('duration-field-row').hidden = !scheduled;
   document.getElementById('gcal-field-row').hidden = !scheduled || !state.gcalConnected;
+  document.getElementById('reminder-field-row').hidden = !scheduled || !state.gcalConnected;
 }
 
 function timeRangesOverlap(aStart, aEnd, bStart, bEnd) {
@@ -523,6 +526,9 @@ async function syncTaskToGoogleCalendar(taskId, data, previous) {
     description: data.notes || '',
     start: { dateTime: startDate.toISOString(), timeZone: tz },
     end: { dateTime: endDate.toISOString(), timeZone: tz },
+    reminders: data.reminderMinutes
+      ? { useDefault: false, overrides: [{ method: 'email', minutes: data.reminderMinutes }] }
+      : { useDefault: false, overrides: [] },
   };
 
   if (hadEvent && previous.gcalCalendarId === data.gcalCalendarId) {
@@ -554,6 +560,7 @@ taskForm.addEventListener('submit', async (e) => {
     notes: document.getElementById('task-notes').value,
     attachments: pendingAttachments,
     gcalCalendarId: status === 'scheduled' ? document.getElementById('task-gcal-calendar').value : '',
+    reminderMinutes: status === 'scheduled' ? Number(document.getElementById('task-reminder').value) || 0 : 0,
   };
   if (!data.title) return;
   if (status === 'done') data.completedAt = new Date();
