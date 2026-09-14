@@ -1,19 +1,19 @@
 import {
   auth, onAuthStateChanged, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, signOut,
-} from './firebase.js';
+} from './firebase.js?v=2';
 import {
   setUid, seedDefaultsIfNeeded, subscribeTasks, subscribeProjects, subscribeContexts,
   createTask, updateTask, deleteTask, createProject, updateProject, createContext,
   subscribeCalendarSettings, updateCalendarSettings,
-} from './store.js';
-import * as gcal from './gcal.js';
-import { state, notify, onStateChange } from './state.js';
-import { renderInbox, renderToday, renderScheduled, renderNextList, renderNextBoard, renderWaiting, renderSomeday, renderDone } from './views/lists.js';
-import { renderProjectsGrid, renderProjectDetail } from './views/projects.js';
-import { renderCalendar } from './views/calendar.js';
-import { renderReview } from './views/review.js';
-import { escapeHtml, autoResize, todayISO } from './util.js';
+} from './store.js?v=2';
+import * as gcal from './gcal.js?v=2';
+import { state, notify, onStateChange } from './state.js?v=2';
+import { renderInbox, renderToday, renderScheduled, renderNextList, renderNextBoard, renderWaiting, renderSomeday, renderDone } from './views/lists.js?v=2';
+import { renderProjectsGrid, renderProjectDetail } from './views/projects.js?v=2';
+import { renderCalendar } from './views/calendar.js?v=2';
+import { renderReview } from './views/review.js?v=2';
+import { escapeHtml, autoResize, todayISO } from './util.js?v=2';
 
 // ───────────────────────── Theme ─────────────────────────
 const THEME_KEY = 'flow-theme';

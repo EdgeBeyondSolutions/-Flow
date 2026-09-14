@@ -1,6 +1,6 @@
-import { state } from '../state.js';
-import { escapeHtml } from '../util.js';
-import { taskTableHTML, emptyStateHTML } from './taskCard.js';
+import { state } from '../state.js?v=2';
+import { escapeHtml } from '../util.js?v=2';
+import { taskTableHTML, emptyStateHTML } from './taskCard.js?v=2';
 
 export function renderProjectsGrid() {
   const term = state.search.trim().toLowerCase();

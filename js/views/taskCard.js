@@ -1,5 +1,5 @@
-import { escapeHtml, formatDue, isOverdue, priorityLabel } from '../util.js';
-import { state, contextById, projectById } from '../state.js';
+import { escapeHtml, formatDue, isOverdue, priorityLabel } from '../util.js?v=2';
+import { state, contextById, projectById } from '../state.js?v=2';
 
 const PRIORITY_RANK = { critical: 3, high: 2, medium: 1, low: 0 };
 

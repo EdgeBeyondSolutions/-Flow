@@ -1,6 +1,6 @@
-import { state, filteredTasks } from '../state.js';
-import { taskCardHTML, taskTableHTML, emptyStateHTML } from './taskCard.js';
-import { todayISO } from '../util.js';
+import { state, filteredTasks } from '../state.js?v=2';
+import { taskCardHTML, taskTableHTML, emptyStateHTML } from './taskCard.js?v=2';
+import { todayISO } from '../util.js?v=2';
 
 export function renderToday() {
   const today = todayISO();

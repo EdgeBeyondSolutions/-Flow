@@ -1,5 +1,5 @@
-import { state } from '../state.js';
-import { escapeHtml, isoFromDate, todayISO } from '../util.js';
+import { state } from '../state.js?v=2';
+import { escapeHtml, isoFromDate, todayISO } from '../util.js?v=2';
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DOW_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

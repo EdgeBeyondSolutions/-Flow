@@ -1,7 +1,7 @@
 import {
   db, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot,
   query, orderBy, serverTimestamp, writeBatch, setDoc,
-} from './firebase.js';
+} from './firebase.js?v=2';
 
 const DEFAULT_CONTEXTS = [
   { name: '@Calls', color: '#C77D14' },

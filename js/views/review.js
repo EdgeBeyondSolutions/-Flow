@@ -1,4 +1,4 @@
-import { state } from '../state.js';
+import { state } from '../state.js?v=2';
 
 const STEPS = [
   { id: 'inbox-zero', title: 'Empty your Inbox', desc: 'Clarify every captured item: turn it into a next action, a project, something to delegate, or a someday item.' },
