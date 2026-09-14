@@ -356,6 +356,66 @@ const titleInput = document.getElementById('task-title');
 const MAX_ATTACHMENT_BYTES = 700 * 1024;
 const MAX_TOTAL_ATTACHMENT_BYTES = 900 * 1024;
 let pendingAttachments = [];
+let pendingReminders = [];
+const REMINDER_UNIT_MINUTES = { minutes: 1, hours: 60, days: 1440, weeks: 10080 };
+
+function minutesToUnit(minutes) {
+  if (minutes % 10080 === 0 && minutes > 0) return { amount: minutes / 10080, unit: 'weeks' };
+  if (minutes % 1440 === 0 && minutes > 0) return { amount: minutes / 1440, unit: 'days' };
+  if (minutes % 60 === 0 && minutes > 0) return { amount: minutes / 60, unit: 'hours' };
+  return { amount: minutes, unit: 'minutes' };
+}
+
+function renderReminderList() {
+  const el = document.getElementById('reminder-list');
+  el.innerHTML = pendingReminders.map((mins, i) => {
+    const { amount, unit } = minutesToUnit(mins);
+    return `
+      <div class="reminder-row">
+        <span class="reminder-bell">🔔</span>
+        <input type="number" class="reminder-amount" min="1" max="999" value="${amount}" data-index="${i}" />
+        <select class="reminder-unit" data-index="${i}">
+          <option value="minutes" ${unit === 'minutes' ? 'selected' : ''}>${amount === 1 ? 'minute' : 'minutes'}</option>
+          <option value="hours" ${unit === 'hours' ? 'selected' : ''}>${amount === 1 ? 'hour' : 'hours'}</option>
+          <option value="days" ${unit === 'days' ? 'selected' : ''}>${amount === 1 ? 'day' : 'days'}</option>
+          <option value="weeks" ${unit === 'weeks' ? 'selected' : ''}>${amount === 1 ? 'week' : 'weeks'}</option>
+        </select>
+        <span class="reminder-before">before</span>
+        <button type="button" class="icon-btn reminder-remove" data-index="${i}" title="Remove">✕</button>
+      </div>
+    `;
+  }).join('') || '<div class="reminder-empty">No notifications set for this task.</div>';
+}
+
+document.getElementById('add-reminder-btn').addEventListener('click', () => {
+  if (pendingReminders.length >= 5) { showToast('Google Calendar allows up to 5 notifications per event'); return; }
+  pendingReminders.push(10);
+  renderReminderList();
+});
+
+document.getElementById('reminder-list').addEventListener('input', (e) => {
+  const input = e.target.closest('.reminder-amount');
+  if (!input) return;
+  const i = Number(input.dataset.index);
+  const unit = document.querySelector(`.reminder-unit[data-index="${i}"]`).value;
+  const amount = Math.max(1, Number(input.value) || 1);
+  pendingReminders[i] = amount * REMINDER_UNIT_MINUTES[unit];
+});
+
+document.getElementById('reminder-list').addEventListener('change', (e) => {
+  const select = e.target.closest('.reminder-unit');
+  if (!select) return;
+  const i = Number(select.dataset.index);
+  const amount = Number(document.querySelector(`.reminder-amount[data-index="${i}"]`).value) || 1;
+  pendingReminders[i] = amount * REMINDER_UNIT_MINUTES[select.value];
+});
+
+document.getElementById('reminder-list').addEventListener('click', (e) => {
+  const btn = e.target.closest('.reminder-remove');
+  if (!btn) return;
+  pendingReminders.splice(Number(btn.dataset.index), 1);
+  renderReminderList();
+});
 
 function openTaskDrawer(id, defaults = {}) {
   taskForm.reset();
@@ -378,7 +438,8 @@ function openTaskDrawer(id, defaults = {}) {
     pendingAttachments = Array.isArray(t.attachments) ? [...t.attachments] : [];
     renderTaskFormOptions();
     document.getElementById('task-gcal-calendar').value = t.gcalCalendarId || '';
-    document.getElementById('task-reminder').value = t.reminderMinutes || 0;
+    pendingReminders = Array.isArray(t.reminders) ? [...t.reminders] : (t.reminderMinutes ? [t.reminderMinutes] : []);
+    renderReminderList();
   } else {
     document.getElementById('task-status').value = defaults.status || 'inbox';
     document.getElementById('task-project').value = defaults.projectId || '';
@@ -390,7 +451,8 @@ function openTaskDrawer(id, defaults = {}) {
     pendingAttachments = [];
     renderTaskFormOptions();
     document.getElementById('task-gcal-calendar').value = '';
-    document.getElementById('task-reminder').value = 0;
+    pendingReminders = defaults.reminders ? [...defaults.reminders] : [];
+    renderReminderList();
   }
   renderAttachmentList();
   toggleConditionalFields();
@@ -526,8 +588,8 @@ async function syncTaskToGoogleCalendar(taskId, data, previous) {
     description: data.notes || '',
     start: { dateTime: startDate.toISOString(), timeZone: tz },
     end: { dateTime: endDate.toISOString(), timeZone: tz },
-    reminders: data.reminderMinutes
-      ? { useDefault: false, overrides: [{ method: 'email', minutes: data.reminderMinutes }] }
+    reminders: (data.reminders && data.reminders.length)
+      ? { useDefault: false, overrides: data.reminders.map((m) => ({ method: 'email', minutes: m })) }
       : { useDefault: false, overrides: [] },
   };
 
@@ -560,15 +622,15 @@ taskForm.addEventListener('submit', async (e) => {
     notes: document.getElementById('task-notes').value,
     attachments: pendingAttachments,
   };
-  const reminderMinutes = status === 'scheduled' ? Number(document.getElementById('task-reminder').value) || 0 : 0;
+  const reminders = status === 'scheduled' ? [...pendingReminders] : [];
   const explicitCalendarId = document.getElementById('task-gcal-calendar').value;
-  data.reminderMinutes = reminderMinutes;
+  data.reminders = reminders;
   data.gcalCalendarId = status === 'scheduled'
-    ? (explicitCalendarId || (reminderMinutes > 0 ? (state.gcalSettings.writeCalendarId || '') : ''))
+    ? (explicitCalendarId || (reminders.length ? (state.gcalSettings.writeCalendarId || '') : ''))
     : '';
   if (!data.title) return;
   if (status === 'done') data.completedAt = new Date();
-  const reminderNeedsConnection = reminderMinutes > 0 && !data.gcalCalendarId;
+  const reminderNeedsConnection = reminders.length > 0 && !data.gcalCalendarId;
 
   if (dueTime) {
     const conflicts = findConflicts(id, data.due, dueTime, durationMinutes);
