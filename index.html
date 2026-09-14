@@ -185,16 +185,10 @@
         </select>
       </div>
 
-      <div class="field-row" id="gcal-field-row">
-        <label>Sync to Google Calendar</label>
-        <select id="task-gcal-calendar"><option value="">— Don't sync —</option></select>
-      </div>
-
       <div class="field-row" id="reminder-field-row">
-        <label>Email reminder</label>
+        <label>Remind me</label>
         <select id="task-reminder">
-          <option value="0">No reminder</option>
-          <option value="5">5 minutes before</option>
+          <option value="0">Don't remind me</option>
           <option value="10">10 minutes before</option>
           <option value="30">30 minutes before</option>
           <option value="60">1 hour before</option>
@@ -202,7 +196,12 @@
           <option value="2880">2 days before</option>
           <option value="10080">1 week before</option>
         </select>
-        <p class="field-hint">Only sent if this task is synced to a Google Calendar above.</p>
+        <p class="field-hint" id="reminder-hint">Sent by email to your Google account.</p>
+      </div>
+
+      <div class="field-row" id="gcal-field-row">
+        <label>Sync to a specific Google Calendar</label>
+        <select id="task-gcal-calendar"><option value="">— Use default —</option></select>
       </div>
 
       <div class="field-row" id="waiting-field-row">

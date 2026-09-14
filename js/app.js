@@ -249,7 +249,7 @@ function renderTaskFormOptions() {
   const gcalSelect = document.getElementById('task-gcal-calendar');
   const currentGcal = gcalSelect.value;
   const syncedCals = state.gcalCalendars.filter((c) => state.gcalSettings.syncedCalendarIds.includes(c.id));
-  gcalSelect.innerHTML = '<option value="">— Don\'t sync —</option>' +
+  gcalSelect.innerHTML = '<option value="">— Use default —</option>' +
     syncedCals.map((c) => `<option value="${c.id}">${escapeHtml(c.summary)}</option>`).join('');
   gcalSelect.value = currentGcal;
 }
@@ -389,7 +389,7 @@ function openTaskDrawer(id, defaults = {}) {
     document.getElementById('task-delete').hidden = true;
     pendingAttachments = [];
     renderTaskFormOptions();
-    document.getElementById('task-gcal-calendar').value = state.gcalSettings.writeCalendarId || '';
+    document.getElementById('task-gcal-calendar').value = '';
     document.getElementById('task-reminder').value = 0;
   }
   renderAttachmentList();
@@ -479,8 +479,8 @@ function toggleConditionalFields() {
   const scheduled = status === 'scheduled';
   document.getElementById('time-field-row').hidden = !scheduled;
   document.getElementById('duration-field-row').hidden = !scheduled;
-  document.getElementById('gcal-field-row').hidden = !scheduled || !state.gcalConnected;
-  document.getElementById('reminder-field-row').hidden = !scheduled || !state.gcalConnected;
+  document.getElementById('reminder-field-row').hidden = !scheduled;
+  document.getElementById('gcal-field-row').hidden = !scheduled || !state.gcalConnected || state.gcalCalendars.length < 2;
 }
 
 function timeRangesOverlap(aStart, aEnd, bStart, bEnd) {
@@ -559,11 +559,16 @@ taskForm.addEventListener('submit', async (e) => {
     url: document.getElementById('task-url').value.trim(),
     notes: document.getElementById('task-notes').value,
     attachments: pendingAttachments,
-    gcalCalendarId: status === 'scheduled' ? document.getElementById('task-gcal-calendar').value : '',
-    reminderMinutes: status === 'scheduled' ? Number(document.getElementById('task-reminder').value) || 0 : 0,
   };
+  const reminderMinutes = status === 'scheduled' ? Number(document.getElementById('task-reminder').value) || 0 : 0;
+  const explicitCalendarId = document.getElementById('task-gcal-calendar').value;
+  data.reminderMinutes = reminderMinutes;
+  data.gcalCalendarId = status === 'scheduled'
+    ? (explicitCalendarId || (reminderMinutes > 0 ? (state.gcalSettings.writeCalendarId || '') : ''))
+    : '';
   if (!data.title) return;
   if (status === 'done') data.completedAt = new Date();
+  const reminderNeedsConnection = reminderMinutes > 0 && !data.gcalCalendarId;
 
   if (dueTime) {
     const conflicts = findConflicts(id, data.due, dueTime, durationMinutes);
@@ -582,7 +587,7 @@ taskForm.addEventListener('submit', async (e) => {
   if (id) await updateTask(id, data);
   else await createTask(data);
   closeDrawer();
-  showToast('Saved');
+  showToast(reminderNeedsConnection ? 'Saved — connect Google Calendar (Calendar view) to receive this reminder' : 'Saved');
 });
 
 document.getElementById('task-delete').addEventListener('click', async () => {
