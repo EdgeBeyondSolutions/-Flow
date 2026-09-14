@@ -22,7 +22,7 @@ function toolbarHTML(rangeLabel) {
         <option value="month" ${state.calendarViewMode === 'month' ? 'selected' : ''}>Month</option>
       </select>
       <button class="btn btn-ghost" data-action="open-gcal-modal" style="margin-left:auto;">
-        ${state.gcalConnected ? '🔗 Manage calendars' : '🔗 Connect Google Calendar'}
+        ${state.gcalConnected ? `🔗 ${state.gcalAccountEmail || 'Manage calendars'}` : '🔗 Connect Google Calendar'}
       </button>
     </div>
   `;

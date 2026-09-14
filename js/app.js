@@ -549,6 +549,9 @@ function toggleConditionalFields() {
   document.getElementById('duration-field-row').hidden = !scheduled;
   document.getElementById('reminder-field-row').hidden = !scheduled;
   document.getElementById('gcal-field-row').hidden = !scheduled || !state.gcalConnected || state.gcalCalendars.length < 2;
+  document.getElementById('reminder-hint').textContent = state.gcalAccountEmail
+    ? `Sent by email to ${state.gcalAccountEmail}.`
+    : 'Sent by email to your Google account — connect it from the Calendar view to confirm which one.';
 }
 
 function timeRangesOverlap(aStart, aEnd, bStart, bEnd) {
@@ -883,6 +886,7 @@ async function openGcalSettingsModal() {
     }
     gcalModalCalendars = await gcal.listCalendars();
     state.gcalCalendars = gcalModalCalendars;
+    state.gcalAccountEmail = gcalModalCalendars.find((c) => c.primary)?.id || '';
     gcalModalSelected = new Set(state.gcalSettings.syncedCalendarIds || []);
     gcalModalWriteId = state.gcalSettings.writeCalendarId || '';
 

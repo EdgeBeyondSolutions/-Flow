@@ -14,6 +14,7 @@ export const state = {
   gcalConnected: false,
   gcalSettings: { syncedCalendarIds: [], writeCalendarId: '' },
   gcalCalendars: [],
+  gcalAccountEmail: '',
   gcalEventsByDate: {},
 };
 
