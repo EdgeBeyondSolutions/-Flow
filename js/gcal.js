@@ -67,6 +67,7 @@ async function apiFetch(path, opts = {}, interactive = true) {
   const token = await ensureToken(interactive);
   const res = await fetch(`https://www.googleapis.com/calendar/v3${path}`, {
     ...opts,
+    cache: 'no-store',
     headers: { ...(opts.headers || {}), Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
   });
   if (!res.ok) throw new Error(`Calendar API ${res.status}: ${await res.text()}`);
