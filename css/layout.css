@@ -29,12 +29,27 @@
   background: var(--danger-soft); color: var(--danger);
   border-radius: var(--radius-sm); padding: 10px 12px; font-size: 13px; margin-bottom: 14px; text-align: left;
 }
+.auth-error.success { background: var(--next-soft); color: var(--next); }
 .auth-link {
   margin-top: 16px; font-size: 13px; color: var(--text-secondary); text-decoration: underline;
   text-underline-offset: 3px;
 }
 .auth-link:hover { color: var(--accent); }
 .auth-loading { margin-top: 14px; font-size: 13px; color: var(--text-tertiary); }
+
+.auth-divider {
+  display: flex; align-items: center; gap: 10px; margin: 16px 0 4px;
+  font-size: 12px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .04em;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.btn-google {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: var(--surface); color: var(--text-primary); border: 1px solid var(--border);
+  font-weight: 600;
+}
+.btn-google:hover { background: var(--surface-2); }
 
 /* ---------- App shell ---------- */
 .app {

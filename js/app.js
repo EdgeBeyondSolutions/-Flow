@@ -1,7 +1,8 @@
 import {
   auth, onAuthStateChanged, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, signOut,
-} from './firebase.js?v=2';
+  createUserWithEmailAndPassword, signOut, sendPasswordResetEmail,
+  googleProvider, signInWithPopup,
+} from './firebase.js?v=3';
 import {
   setUid, seedDefaultsIfNeeded, subscribeTasks, subscribeProjects, subscribeContexts,
   createTask, updateTask, deleteTask, createProject, updateProject, createContext,
@@ -66,6 +67,50 @@ authToggle.addEventListener('click', () => {
   authSubmit.textContent = authMode === 'signin' ? 'Sign in' : 'Create account';
   authToggle.textContent = authMode === 'signin' ? 'First time here? Create an account' : 'Already have an account? Sign in';
   authError.hidden = true;
+});
+
+document.getElementById('auth-forgot').addEventListener('click', async () => {
+  const email = document.getElementById('auth-email').value.trim();
+  if (!email) {
+    authError.textContent = 'Type your email above first, then click "Forgot your password?" again.';
+    authError.hidden = false;
+    return;
+  }
+  authError.hidden = true;
+  authError.classList.remove('success');
+  authLoading.hidden = false;
+  try {
+    await sendPasswordResetEmail(auth, email);
+    authError.classList.add('success');
+    authError.textContent = `Password reset email sent to ${email}. Check your inbox.`;
+    authError.hidden = false;
+  } catch (err) {
+    authError.textContent = translateAuthError(err.code);
+    authError.hidden = false;
+  } finally {
+    authLoading.hidden = true;
+  }
+});
+
+document.getElementById('auth-google').addEventListener('click', async () => {
+  authError.hidden = true;
+  authError.classList.remove('success');
+  authLoading.hidden = false;
+  try {
+    await signInWithPopup(auth, googleProvider);
+  } catch (err) {
+    if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+      // user dismissed the popup — no error to show
+    } else if (err.code === 'auth/account-exists-with-different-credential') {
+      authError.textContent = 'This email already has a -Flow account with a password. Sign in with your password below, then Google sign-in will work for it too.';
+      authError.hidden = false;
+    } else {
+      authError.textContent = translateAuthError(err.code);
+      authError.hidden = false;
+    }
+  } finally {
+    authLoading.hidden = true;
+  }
 });
 
 authForm.addEventListener('submit', async (e) => {
