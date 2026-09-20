@@ -1,4 +1,4 @@
-import { state } from '../state.js?v=2';
+import { state } from '../state.js?v=3';
 import { escapeHtml } from '../util.js?v=2';
 import { taskTableHTML, emptyStateHTML } from './taskCard.js?v=2';
 

@@ -1,4 +1,4 @@
-import { state, filteredTasks } from '../state.js?v=2';
+import { state, filteredTasks } from '../state.js?v=3';
 import { taskCardHTML, taskTableHTML, emptyStateHTML } from './taskCard.js?v=2';
 import { todayISO } from '../util.js?v=2';
 

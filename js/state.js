@@ -16,6 +16,8 @@ export const state = {
   gcalCalendars: [],
   gcalAccountEmail: '',
   gcalEventsByDate: {},
+  groceryItems: [],
+  habits: [],
 };
 
 const renderListeners = new Set();

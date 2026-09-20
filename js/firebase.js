@@ -8,6 +8,7 @@ import {
 import {
   getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
   onSnapshot, query, orderBy, serverTimestamp, setDoc, writeBatch,
+  arrayUnion, arrayRemove,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const app = initializeApp(firebaseConfig);
@@ -20,5 +21,5 @@ export {
   onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail,
   signInWithPopup,
   collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy,
-  serverTimestamp, setDoc, writeBatch,
+  serverTimestamp, setDoc, writeBatch, arrayUnion, arrayRemove,
 };

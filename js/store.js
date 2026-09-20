@@ -1,7 +1,7 @@
 import {
   db, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot,
-  query, orderBy, serverTimestamp, writeBatch, setDoc,
-} from './firebase.js?v=3';
+  query, orderBy, serverTimestamp, writeBatch, setDoc, arrayUnion, arrayRemove,
+} from './firebase.js?v=4';
 
 const DEFAULT_CONTEXTS = [
   { name: '@Calls', color: '#C77D14' },
@@ -91,6 +91,64 @@ export function createContext(data) {
 
 export function deleteContext(id) {
   return deleteDoc(doc(col('contexts'), id));
+}
+
+// ───────────────────────── Grocery list ─────────────────────────
+export function subscribeGroceryItems(cb) {
+  const q = query(col('groceryItems'), orderBy('createdAt', 'asc'));
+  return onSnapshot(q, (snap) => {
+    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  });
+}
+
+export function createGroceryItem(data) {
+  return addDoc(col('groceryItems'), {
+    name: '', category: 'Other', quantity: '', checked: false,
+    createdAt: serverTimestamp(), ...data,
+  });
+}
+
+export function updateGroceryItem(id, data) {
+  return updateDoc(doc(col('groceryItems'), id), data);
+}
+
+export function deleteGroceryItem(id) {
+  return deleteDoc(doc(col('groceryItems'), id));
+}
+
+export function clearCheckedGroceryItems(ids) {
+  const batch = writeBatch(db);
+  ids.forEach((id) => batch.delete(doc(col('groceryItems'), id)));
+  return batch.commit();
+}
+
+// ───────────────────────── Habits ─────────────────────────
+export function subscribeHabits(cb) {
+  const q = query(col('habits'), orderBy('createdAt', 'asc'));
+  return onSnapshot(q, (snap) => {
+    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  });
+}
+
+export function createHabit(data) {
+  return addDoc(col('habits'), {
+    name: '', color: '#5B3FE0', archived: false, completions: [],
+    createdAt: serverTimestamp(), ...data,
+  });
+}
+
+export function updateHabit(id, data) {
+  return updateDoc(doc(col('habits'), id), data);
+}
+
+export function deleteHabit(id) {
+  return deleteDoc(doc(col('habits'), id));
+}
+
+export function setHabitDoneOnDate(id, dateISO, done) {
+  return updateDoc(doc(col('habits'), id), {
+    completions: done ? arrayUnion(dateISO) : arrayRemove(dateISO),
+  });
 }
 
 function settingsDoc() { return doc(db, 'users', uid, 'settings', 'googleCalendar'); }

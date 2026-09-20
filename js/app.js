@@ -2,18 +2,22 @@ import {
   auth, onAuthStateChanged, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, signOut, sendPasswordResetEmail,
   googleProvider, signInWithPopup,
-} from './firebase.js?v=3';
+} from './firebase.js?v=4';
 import {
   setUid, seedDefaultsIfNeeded, subscribeTasks, subscribeProjects, subscribeContexts,
   createTask, updateTask, deleteTask, createProject, updateProject, createContext,
   subscribeCalendarSettings, updateCalendarSettings,
-} from './store.js?v=2';
+  subscribeGroceryItems, createGroceryItem, updateGroceryItem, deleteGroceryItem, clearCheckedGroceryItems,
+  subscribeHabits, createHabit, deleteHabit, setHabitDoneOnDate,
+} from './store.js?v=3';
 import * as gcal from './gcal.js?v=2';
-import { state, notify, onStateChange } from './state.js?v=2';
+import { state, notify, onStateChange } from './state.js?v=3';
 import { renderInbox, renderToday, renderScheduled, renderNextList, renderNextBoard, renderWaiting, renderSomeday, renderDone } from './views/lists.js?v=2';
 import { renderProjectsGrid, renderProjectDetail } from './views/projects.js?v=2';
 import { renderCalendar } from './views/calendar.js?v=2';
 import { renderReview } from './views/review.js?v=2';
+import { renderGrocery } from './views/grocery.js?v=2';
+import { renderHabits } from './views/habits.js?v=2';
 import { escapeHtml, autoResize, todayISO } from './util.js?v=2';
 
 // ───────────────────────── Theme ─────────────────────────
@@ -175,6 +179,8 @@ function boot() {
     state.gcalSettings = settings;
     render();
   }));
+  unsubscribers.push(subscribeGroceryItems((items) => { state.groceryItems = items; render(); }));
+  unsubscribers.push(subscribeHabits((habits) => { state.habits = habits; render(); }));
 
   // Silent (prompt:'') token requests show no UI by design — they either
   // succeed quietly or fail quietly. Only interactive connects (the
@@ -198,6 +204,7 @@ function boot() {
 // ───────────────────────── Navigation ─────────────────────────
 const viewTitles = {
   inbox: 'Inbox', today: 'Today', scheduled: 'Scheduled', next: 'Next actions', projects: 'Projects', waiting: 'Waiting for',
+  grocery: 'Grocery list', habits: 'Habits',
   calendar: 'Calendar', someday: 'Someday / Maybe', review: 'Weekly review', done: 'Done',
 };
 
@@ -247,6 +254,8 @@ function render() {
   document.getElementById('count-waiting').textContent = state.tasks.filter((t) => t.status === 'waiting').length;
   document.getElementById('count-someday').textContent = state.tasks.filter((t) => t.status === 'someday').length;
   document.getElementById('count-projects').textContent = state.projects.length;
+  document.getElementById('count-grocery').textContent = state.groceryItems.filter((i) => !i.checked).length;
+  document.getElementById('count-habits').textContent = state.habits.filter((h) => !h.archived).length;
 
   renderContextNav();
   renderTaskFormOptions();
@@ -265,6 +274,8 @@ function render() {
       body.innerHTML = state.selectedProjectId ? renderProjectDetail(state.selectedProjectId) : renderProjectsGrid();
       break;
     case 'waiting': body.innerHTML = renderWaiting(); break;
+    case 'grocery': body.innerHTML = renderGrocery(); break;
+    case 'habits': body.innerHTML = renderHabits(); break;
     case 'calendar': body.innerHTML = renderCalendar(); break;
     case 'someday': body.innerHTML = renderSomeday(); break;
     case 'review': body.innerHTML = renderReview(); break;
@@ -378,6 +389,61 @@ document.getElementById('view-body').addEventListener('click', (e) => {
 
   const refreshGcal = e.target.closest('[data-action="cal-refresh-gcal"]');
   if (refreshGcal) { refreshGcalEvents(); showToast('Refreshing Google Calendar…'); return; }
+
+  const groceryToggle = e.target.closest('[data-action="grocery-toggle"]');
+  if (groceryToggle) {
+    const item = state.groceryItems.find((i) => i.id === groceryToggle.dataset.id);
+    if (item) updateGroceryItem(item.id, { checked: !item.checked });
+    return;
+  }
+  const groceryDelete = e.target.closest('[data-action="grocery-delete"]');
+  if (groceryDelete) { deleteGroceryItem(groceryDelete.dataset.id); return; }
+  const groceryClear = e.target.closest('[data-action="grocery-clear-checked"]');
+  if (groceryClear) {
+    const ids = state.groceryItems.filter((i) => i.checked).map((i) => i.id);
+    if (ids.length) clearCheckedGroceryItems(ids);
+    return;
+  }
+
+  const habitToggleToday = e.target.closest('[data-action="habit-toggle-today"]');
+  if (habitToggleToday) {
+    const habit = state.habits.find((h) => h.id === habitToggleToday.dataset.id);
+    if (habit) {
+      const today = todayISO();
+      const done = (habit.completions || []).includes(today);
+      setHabitDoneOnDate(habit.id, today, !done);
+    }
+    return;
+  }
+  const habitDelete = e.target.closest('[data-action="habit-delete"]');
+  if (habitDelete) { deleteHabit(habitDelete.dataset.id); return; }
+});
+
+document.getElementById('view-body').addEventListener('submit', (e) => {
+  const groceryForm = e.target.closest('#grocery-add-form');
+  if (groceryForm) {
+    e.preventDefault();
+    const nameInput = document.getElementById('grocery-add-name');
+    const qtyInput = document.getElementById('grocery-add-qty');
+    const categorySelect = document.getElementById('grocery-add-category');
+    const name = nameInput.value.trim();
+    if (!name) return;
+    createGroceryItem({ name, quantity: qtyInput.value.trim(), category: categorySelect.value });
+    nameInput.value = '';
+    qtyInput.value = '';
+    nameInput.focus();
+    return;
+  }
+  const habitForm = e.target.closest('#habit-add-form');
+  if (habitForm) {
+    e.preventDefault();
+    const nameInput = document.getElementById('habit-add-name');
+    const name = nameInput.value.trim();
+    if (!name) return;
+    createHabit({ name });
+    nameInput.value = '';
+    nameInput.focus();
+  }
 });
 
 document.getElementById('view-body').addEventListener('change', (e) => {

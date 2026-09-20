@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="css/base.css?v=3" />
 <link rel="stylesheet" href="css/layout.css?v=4" />
 <link rel="stylesheet" href="css/components.css?v=3" />
-<link rel="stylesheet" href="css/views.css?v=3" />
+<link rel="stylesheet" href="css/views.css?v=4" />
 </head>
 <body>
 
@@ -88,6 +88,12 @@
       </button>
       <button class="nav-item" data-view="waiting" title="Waiting for">
         <span class="nav-icon">⏳</span><span class="nav-label">Waiting for</span><span class="nav-count nav-label" id="count-waiting">0</span>
+      </button>
+      <button class="nav-item" data-view="grocery" title="Grocery list">
+        <span class="nav-icon">🛒</span><span class="nav-label">Grocery list</span><span class="nav-count nav-label" id="count-grocery">0</span>
+      </button>
+      <button class="nav-item" data-view="habits" title="Habits">
+        <span class="nav-icon">🔥</span><span class="nav-label">Habits</span><span class="nav-count nav-label" id="count-habits">0</span>
       </button>
       <button class="nav-item" data-view="calendar" title="Calendar">
         <span class="nav-icon">📆</span><span class="nav-label">Calendar</span>
@@ -311,6 +317,6 @@
 <div id="toast" class="toast" hidden></div>
 
 <script type="module" src="js/firebase-config.js?v=2"></script>
-<script type="module" src="js/app.js?v=3"></script>
+<script type="module" src="js/app.js?v=4"></script>
 </body>
 </html>

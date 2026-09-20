@@ -1,4 +1,4 @@
-import { state } from '../state.js?v=2';
+import { state } from '../state.js?v=3';
 import { escapeHtml, isoFromDate, todayISO } from '../util.js?v=2';
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
