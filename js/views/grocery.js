@@ -4,7 +4,7 @@ import { emptyStateHTML } from './taskCard.js?v=2';
 
 export const GROCERY_CATEGORIES = [
   'Produce', 'Dairy', 'Meat & Fish', 'Bakery',
-  'Pantry', 'Beverages', 'Cleaning', 'Personal Care', 'Other',
+  'Pantry', 'Beverages', 'Cleaning', 'Personal Care', 'Clothing & Footwear', 'Other',
 ];
 
 function itemRowHTML(item) {

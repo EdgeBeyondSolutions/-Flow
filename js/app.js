@@ -16,7 +16,7 @@ import { renderInbox, renderToday, renderScheduled, renderNextList, renderNextBo
 import { renderProjectsGrid, renderProjectDetail } from './views/projects.js?v=2';
 import { renderCalendar } from './views/calendar.js?v=2';
 import { renderReview } from './views/review.js?v=2';
-import { renderGrocery } from './views/grocery.js?v=2';
+import { renderGrocery } from './views/grocery.js?v=3';
 import { renderHabits } from './views/habits.js?v=2';
 import { escapeHtml, autoResize, todayISO } from './util.js?v=2';
 
