@@ -18,7 +18,7 @@ import { renderCalendar } from './views/calendar.js?v=2';
 import { renderReview } from './views/review.js?v=2';
 import { renderGrocery } from './views/grocery.js?v=3';
 import { renderHabits } from './views/habits.js?v=2';
-import { escapeHtml, autoResize, todayISO } from './util.js?v=2';
+import { escapeHtml, autoResize, todayISO, isoFromDate } from './util.js?v=2';
 
 // ───────────────────────── Theme ─────────────────────────
 const THEME_KEY = 'flow-theme';
@@ -708,7 +708,7 @@ function findConflicts(taskId, due, dueTime, durationMinutes) {
 }
 
 async function syncTaskToGoogleCalendar(taskId, data, previous) {
-  const wantsSync = data.status === 'scheduled' && data.dueTime && data.gcalCalendarId;
+  const wantsSync = data.status === 'scheduled' && data.due && data.gcalCalendarId;
   const hadEvent = previous?.gcalEventId && previous?.gcalCalendarId;
 
   if (!wantsSync) {
@@ -716,14 +716,24 @@ async function syncTaskToGoogleCalendar(taskId, data, previous) {
     return { gcalEventId: '', gcalCalendarId: '' };
   }
 
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const startDate = new Date(`${data.due}T${data.dueTime}:00`);
-  const endDate = new Date(startDate.getTime() + data.durationMinutes * 60000);
+  let start, end;
+  if (data.dueTime) {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const startDate = new Date(`${data.due}T${data.dueTime}:00`);
+    const endDate = new Date(startDate.getTime() + data.durationMinutes * 60000);
+    start = { dateTime: startDate.toISOString(), timeZone: tz };
+    end = { dateTime: endDate.toISOString(), timeZone: tz };
+  } else {
+    // No specific time: sync as an all-day event so date-only reminders still fire.
+    const nextDay = new Date(`${data.due}T00:00:00`);
+    nextDay.setDate(nextDay.getDate() + 1);
+    start = { date: data.due };
+    end = { date: isoFromDate(nextDay) };
+  }
   const event = {
     summary: data.title,
     description: data.notes || '',
-    start: { dateTime: startDate.toISOString(), timeZone: tz },
-    end: { dateTime: endDate.toISOString(), timeZone: tz },
+    start, end,
     reminders: (data.reminders && data.reminders.length)
       ? { useDefault: false, overrides: data.reminders.map((m) => ({ method: 'email', minutes: m })) }
       : { useDefault: false, overrides: [] },
